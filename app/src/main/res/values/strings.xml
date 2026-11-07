@@ -1,0 +1,158 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">SortSnap</string>
+
+    <!-- Navigation -->
+    <string name="nav_gallery">Gallery</string>
+    <string name="nav_categories">Categories</string>
+    <string name="nav_review">Review</string>
+    <string name="nav_settings">Settings</string>
+    <string name="back">Back</string>
+    <string name="close">Close</string>
+    <string name="cancel">Cancel</string>
+    <string name="done">Done</string>
+    <string name="retry">Retry</string>
+
+    <!-- Categories -->
+    <string name="category_photo">Photos</string>
+    <string name="category_screenshot">Screenshots</string>
+    <string name="category_meme">Memes</string>
+    <string name="category_forward">Forwards</string>
+    <string name="category_document">Documents</string>
+    <string name="category_other">Other</string>
+    <string name="category_photo_single">Photo</string>
+    <string name="category_screenshot_single">Screenshot</string>
+    <string name="category_meme_single">Meme</string>
+    <string name="category_forward_single">Forward</string>
+    <string name="category_document_single">Document</string>
+    <string name="category_other_single">Other</string>
+
+    <!-- Onboarding / permissions -->
+    <string name="onboarding_title">Your gallery, minus the clutter</string>
+    <string name="onboarding_body">SortSnap separates real photos from screenshots, memes, forwards and documents so your gallery shows what matters.</string>
+    <string name="onboarding_privacy_title">Everything stays on this phone</string>
+    <string name="onboarding_privacy_body">SortSnap has no internet permission. Sorting runs entirely on your device and no photo ever leaves it.</string>
+    <string name="onboarding_why_title">Why photo access?</string>
+    <string name="onboarding_why_body">To show and sort your pictures, SortSnap needs to read your photo library. You can choose all photos or just some.</string>
+    <string name="onboarding_allow">Allow photo access</string>
+    <string name="onboarding_open_settings">Open settings</string>
+    <string name="onboarding_denied">Photo access was denied. You can turn it on in system settings.</string>
+    <string name="partial_access_banner">SortSnap can only see the photos you selected.</string>
+    <string name="partial_access_action">Allow all</string>
+
+    <!-- Gallery -->
+    <string name="filter_all">All</string>
+    <string name="filter_photos_only">Photos only</string>
+    <string name="date_today">Today</string>
+    <string name="date_yesterday">Yesterday</string>
+    <string name="date_this_week">This week</string>
+    <string name="selected_count">%1$d selected</string>
+    <string name="action_move_to_category">Move to category</string>
+    <string name="action_trash">Move to trash</string>
+    <string name="action_select_all">Select all</string>
+    <string name="action_info">Details</string>
+    <string name="scanning_progress">Sorting %1$d of %2$d</string>
+    <string name="scanning_sync">Checking library…</string>
+    <string name="scan_waiting_charger">Sorting will start when charging</string>
+    <string name="empty_gallery_title">No pictures here</string>
+    <string name="empty_gallery_body">Photos you take or save will show up here.</string>
+    <string name="empty_filter_body">Nothing in this category yet. Sorting may still be running.</string>
+    <string name="error_loading">Couldn\'t load pictures</string>
+    <string name="cd_thumbnail">%1$s, %2$s</string>
+    <string name="cd_selected">selected</string>
+    <string name="cd_image">Image %1$s</string>
+
+    <!-- Viewer / details -->
+    <string name="details_title">Details</string>
+    <string name="details_name">Name</string>
+    <string name="details_date">Date</string>
+    <string name="details_size">Size</string>
+    <string name="details_resolution">Resolution</string>
+    <string name="details_folder">Folder</string>
+    <string name="details_category">Category</string>
+    <string name="details_confidence">Confidence</string>
+    <string name="details_why">Why?</string>
+    <string name="details_set_by_you">Set by you</string>
+    <string name="details_not_sorted">Not sorted yet</string>
+    <string name="details_no_reasons">No strong signals: shown in Other so it is never hidden.</string>
+    <string name="pick_category_title">Move to category</string>
+
+    <!-- Categories screen -->
+    <string name="categories_title">Smart albums</string>
+    <string name="category_count">%1$d · %2$s</string>
+
+    <!-- Review -->
+    <string name="review_title">Review</string>
+    <string name="review_confirm_title">Is this right?</string>
+    <string name="review_confirm_question">We think this is a %1$s (%2$s sure)</string>
+    <string name="review_yes">Yes</string>
+    <string name="review_no">No, change</string>
+    <string name="review_skip">Skip</string>
+    <string name="review_confirm_progress">%1$d left today</string>
+    <string name="review_confirm_done">All caught up for today. Thanks for teaching SortSnap!</string>
+    <string name="review_cleanup_title">Free up space</string>
+    <string name="section_old_screenshots">Old screenshots</string>
+    <string name="section_old_screenshots_sub">Older than 30 days</string>
+    <string name="section_memes">Memes</string>
+    <string name="section_forwards">Forwards</string>
+    <string name="section_near_duplicates">Near-duplicates</string>
+    <string name="section_near_duplicates_sub">The best copy is kept</string>
+    <string name="section_blurry">Blurry photos</string>
+    <string name="section_reclaimable">%1$d items · %2$s</string>
+    <string name="section_empty">Nothing to clean up here.</string>
+    <string name="section_hint">Everything is selected. Tap the ones you want to keep.</string>
+    <string name="trash_selected">Move %1$d to trash · %2$s</string>
+    <string name="swipe_mode">Swipe mode</string>
+    <string name="swipe_mode_sub">Left to trash, right to keep, up to recategorise</string>
+    <string name="swipe_undo">Undo</string>
+    <string name="swipe_commit">Trash %1$d marked</string>
+    <string name="swipe_empty">No more clutter to review.</string>
+    <string name="swipe_keep">Keep</string>
+    <string name="swipe_trash">Trash</string>
+    <string name="freed_space">Freed %1$s</string>
+    <string name="moved_to_trash_hint">Items stay in the system trash for 30 days.</string>
+    <string name="delete_cancelled">Nothing was deleted</string>
+    <string name="delete_failed">Couldn\'t delete: %1$s</string>
+    <string name="confirm_delete_title">Delete %1$d items?</string>
+    <string name="confirm_delete_body">This frees %1$s. On this Android version deleted items cannot be recovered.</string>
+    <string name="confirm_delete_action">Delete</string>
+
+    <!-- Settings -->
+    <string name="settings_title">Settings</string>
+    <string name="settings_hide_clutter">Hide clutter from main gallery</string>
+    <string name="settings_hide_clutter_sub">Screenshots, memes, forwards and documents stay in their albums</string>
+    <string name="settings_unsure">Default category for unsure images</string>
+    <string name="settings_rescan">Rescan library</string>
+    <string name="settings_rescan_sub">Re-sort everything you have not corrected yourself</string>
+    <string name="settings_scan_now">Scan now anyway</string>
+    <string name="settings_scan_now_sub">Ignore the battery rule for the first full scan</string>
+    <string name="settings_learned_rules">Learned rules</string>
+    <string name="settings_learned_rules_empty">None yet. Correct 5 pictures from the same folder to teach SortSnap a rule.</string>
+    <string name="settings_learned_rule">\"%1$s\" → %2$s</string>
+    <string name="settings_learned_rule_sub">From %1$d corrections</string>
+    <string name="settings_delete_rule">Delete rule</string>
+    <string name="settings_clear_rules">Clear learned rules</string>
+    <string name="settings_theme">Theme</string>
+    <string name="theme_system">System default</string>
+    <string name="theme_light">Light</string>
+    <string name="theme_dark">Dark</string>
+    <string name="settings_dynamic_color">Dynamic colour</string>
+    <string name="settings_about">About &amp; privacy</string>
+    <string name="settings_debug">Scan statistics (debug)</string>
+    <string name="rescan_started">Rescan started</string>
+    <string name="rules_cleared">Learned rules cleared</string>
+
+    <!-- About -->
+    <string name="about_title">About &amp; privacy</string>
+    <string name="about_version">Version %1$s</string>
+    <string name="about_privacy">SortSnap works 100% on your device.\n\n• It has no internet permission, so it physically cannot upload anything.\n• No analytics, no ads, no accounts.\n• Sorting uses on-device ML Kit models bundled inside the app.\n• Your corrections and learned rules are stored only in the app\'s private storage and are excluded from cloud backup.\n• Deleting always goes through Android\'s own confirmation, and on Android 11+ items go to the system trash first.</string>
+
+    <!-- Debug -->
+    <string name="debug_title">Scan statistics</string>
+    <string name="debug_images_per_sec">Images / sec</string>
+    <string name="debug_avg_ml">Average ML time</string>
+    <string name="debug_queue">Queue length</string>
+    <string name="debug_indexed">Indexed images</string>
+    <string name="debug_processed">Processed (all runs)</string>
+    <string name="debug_version">Classifier version</string>
+</resources>

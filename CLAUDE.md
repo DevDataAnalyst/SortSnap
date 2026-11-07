@@ -32,7 +32,7 @@ Every image gets exactly one primary category plus a confidence score in 0..1.
 
 Kotlin, Jetpack Compose, Material 3 (dynamic colour), MVVM, Hilt, Kotlin Coroutines + Flow, Room,
 WorkManager, Coil 3, ML Kit Image Labeling and Text Recognition (bundled, offline models),
-Paging 3, DataStore. `minSdk 26`, `targetSdk`/`compileSdk` = latest stable platform installed (36).
+Paging 3, DataStore. `minSdk 26`, `targetSdk`/`compileSdk` = latest stable platform installed (37.2).
 
 ## Architecture
 
@@ -70,8 +70,8 @@ Rules:
 - Coverage: `./gradlew :core:koverHtmlReport :core:koverVerify` (80% minimum on `:core`).
 - Keep the "Progress" section at the bottom of this file updated at the end of each task with what
   was built and what is next.
-- Environment: `ANDROID_HOME` must point to an SDK with `platforms;android-36` and
-  `build-tools;36.1.0` (or set `sdk.dir` in `local.properties`, which is git-ignored).
+- Environment: `ANDROID_HOME` must point to an SDK with `platforms;android-37.2` and
+  `build-tools;37.0.0` (or set `sdk.dir` in `local.properties`, which is git-ignored).
 
 ## Progress
 
