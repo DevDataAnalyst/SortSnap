@@ -76,3 +76,82 @@ Rules:
 ## Progress
 
 - **Prompt 0** — Brief written, `.gitignore` added, git initialised.
+- **Prompt 1** — Gradle KTS + version catalog (AGP 9.5.1, Kotlin 2.4.21, Compose BOM 2026.09.00,
+  compileSdk/targetSdk 37.2), Hilt app class, single `MainActivity`, Compose Navigation with bottom bar
+  (Gallery, Categories, Review, Settings), Material 3 with dynamic colour + dark mode, splash screen.
+- **Prompt 2** — `PhotoAccess` (13+: READ_MEDIA_IMAGES, 14+: partial access banner, ≤12:
+  READ_EXTERNAL_STORAGE), onboarding screen, `MediaStoreRepository` (Bundle LIMIT/OFFSET paging,
+  stamps, by-id queries), `ContentObserver` flow, `MediaStoreCursorMapper` + tests.
+- **Prompt 3** — Paged `LazyVerticalGrid` with date headers (Today / Yesterday / This week /
+  Month Year), pinch for 3/4/5 columns, Coil thumbnails at bucketed sizes with stable keys, long-press
+  multi-select, full-screen `HorizontalPager` viewer (placeholders so indices are absolute) with
+  pinch/double-tap zoom and a details sheet.
+- **Prompt 4** — Room `ImageRecord` (+ stored `effectiveCategory`), `IndexSync` using `SyncDiff`,
+  `ScanWorker` (batches of 50, battery-not-low, progress), observer-triggered incremental scans, full
+  rescan when `ClassifierConfig.VERSION` changes, slim progress bar in the Gallery top bar.
+- **Prompt 5** — `:core` rule-based first pass: 11 rules, `ClassifierConfig`, `ScoreFusion`.
+- **Prompt 6** — ML Kit bundled text recognition + labeling (max 1024 px, concurrency 2, only when
+  first pass < 0.85), 9 ML rules, signals stored as JSON, classifier version 2.
+- **Prompt 7** — Category tiles (cover, count, size, live from Room), album screens reusing the grid,
+  filter chips (All / Photos only / per category; "Hide clutter" default ON), "Why?" list.
+- **Prompt 8** — Move to category (viewer + multi-select) sets `userOverride`, corrections table,
+  per-folder learned rules (5+ corrections, clear majority, deletable in Settings, deleted rules need
+  5 more corrections to come back), daily "Is this right?" card (20 images, 0.55–0.75).
+- **Prompt 9** — Review: old screenshots (>30 days), memes, forwards, near-duplicates (dHash,
+  multi-index hashing, Hamming ≤ 4, largest copy kept), blurry photos (Laplacian variance < 60).
+  Select-all grids with tap-to-keep, swipe mode with undo (last 10), trash/delete flow.
+- **Prompt 10** — Instant first launch: "All" pages MediaStore directly; index builds in WorkManager.
+  Resumable cursor in `scan_state`; initial full scan only when charging or battery > 30% (else waits
+  for the charger), "Scan now anyway" in Settings. Room indices on category, effectiveCategory,
+  dateTaken, bucket, contentHash, classifierVersion. Thumbnail-only decodes (256 px for stats,
+  1024 px for ML, 2048 px in the viewer), bitmaps recycled, ML clients closed after each scan.
+  `:baselineprofile` module (startup + gallery scroll). Debug-only scan statistics screen.
+- **Prompt 11** — `:core` 129 tests, line coverage 98.9% (Kover, 80% gate). Evaluation harness with
+  60 synthetic fixtures. `:app` 31 tests: cursor mapping, permissions, paging source, Room (override
+  safety, priors), Robolectric Compose UI tests (onboarding, filter chips, multi-select, delete
+  confirmation with a fake deleter, details "Why?").
+- **Prompt 12** — Settings complete, empty/error/skeleton states, haptics on swipe/long-press,
+  content descriptions, adaptive + monochrome icon, strings in `strings.xml`, R8 + resource shrinking,
+  keep rules, `docs/SIGNING.md`, `docs/PLAY_STORE_CHECKLIST.md`. `bundleRelease` and `assembleRelease`
+  build; merged manifest verified to have no INTERNET permission.
+
+### Evaluation (60 synthetic fixtures, classifier v2)
+
+```
+actual \ predicted    PHOTO SCREENSHOT MEME FORWARD DOCUMENT OTHER
+PHOTO                   11      0        0     0       0       1
+SCREENSHOT               0     12        0     0       0       0
+MEME                     0      0       11     0       0       1
+FORWARD                  0      0        0    12       0       0
+DOCUMENT                 0      0        0     0       9       3
+accuracy 0.917 · precision 1.00 for every category (misses all fall to OTHER, never hidden)
+First pass only (no ML): accuracy 0.317
+```
+
+### Deletion edge cases handled (Prompt 9)
+
+- Android 11+: `createTrashRequest` (recoverable 30 days); falls back to `createDeleteRequest` if
+  trash throws. Selections split into chunks of 1000 to keep the IntentSender under the Binder limit;
+  one dialog per chunk; declining a chunk stops the rest but keeps what was already approved.
+- Android 10: delete one by one; `RecoverableSecurityException` launches its consent IntentSender,
+  then the same item is retried and the loop continues.
+- Android 9 and below: no system dialog exists, so an in-app confirmation dialog is mandatory;
+  delete via `WRITE_EXTERNAL_STORAGE` (maxSdk 28).
+- User cancels: nothing removed, "Nothing was deleted" snackbar.
+- Duplicate ids in a selection are de-duplicated; an empty selection is a no-op.
+- After success the rows are removed from Room immediately and "Freed X" is shown; the observer
+  sync also removes trashed items (MediaStore hides them).
+- A null MediaStore cursor is treated as an error, never as "library is empty", so a transient
+  failure cannot wipe the index or user corrections.
+
+### Known limitations / next
+
+- Not yet run on a real device or emulator (no KVM in the build container): install
+  `app-debug.apk`, seed a test phone, and paste any crash logcat back.
+- Android 14 partial access: images the user deselects are dropped from the index on the next sync,
+  including their manual overrides (the correction log keeps the history).
+- Swipe-mode undo of "move category" restores the previous category as an override rather than
+  clearing the override.
+- The Baseline Profile must be generated on a device (`./gradlew :app:generateReleaseBaselineProfile`).
+- Next: run on device, real fixtures in the eval CSV, then optional extensions (custom TFLite model,
+  FTS search over OCR text, cleanup reminders, Glance widget, Devanagari OCR).
