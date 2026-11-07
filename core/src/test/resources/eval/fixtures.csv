@@ -1,0 +1,105 @@
+id,label,relative_path,bucket,display_name,mime,width,height,size,exif_make,exif_model,focal,gps,screen_w,screen_h,brightness,uniformity,text,line_count,text_coverage,top_band,bottom_band,labels
+photo_000,PHOTO,DCIM/Camera/,Camera,PXL_20260000.jpg,image/jpeg,4080,3072,4181950,Google,Pixel 9,1,1,1080,2400,0.33,0.25,EXIT,1,0.01,0,0,Person:0.93|Smile:0.81
+photo_001,PHOTO,DCIM/Camera/,Camera,PXL_20260001.jpg,image/jpeg,4080,3072,2527150,Google,Pixel 9,1,0,1080,2400,0.37,0.25,,0,0.0,0,0,Food:0.88|Tableware:0.7
+photo_002,PHOTO,DCIM/Camera/,Camera,PXL_20260002.jpg,image/jpeg,4080,3072,4338283,Google,Pixel 9,1,1,1080,2400,0.52,0.21,,0,0.0,0,0,Dog:0.91|Pet:0.86
+photo_003,PHOTO,DCIM/Camera/,Camera,PXL_20260003.jpg,image/jpeg,4080,3072,3976705,,,0,0,1080,2400,0.43,0.11,,0,0.0,0,0,Sky:0.9|Mountain:0.8
+photo_004,PHOTO,DCIM/Camera/,Camera,PXL_20260004.jpg,image/jpeg,4080,3072,2417034,Google,Pixel 9,1,1,1080,2400,0.37,0.22,,0,0.0,0,0,Flower:0.85|Plant:0.8
+photo_005,PHOTO,DCIM/Camera/,Camera,PXL_20260005.jpg,image/jpeg,4080,3072,3854032,Google,Pixel 9,1,0,1080,2400,0.36,0.23,EXIT,1,0.01,0,0,Crowd:0.77|Event:0.7
+photo_006,PHOTO,DCIM/Camera/,Camera,PXL_20260006.jpg,image/jpeg,4080,3072,3785650,Google,Pixel 9,1,1,1080,2400,0.43,0.19,,0,0.0,0,0,Selfie:0.9|Person:0.88
+photo_007,PHOTO,DCIM/Camera/,Camera,PXL_20260007.jpg,image/jpeg,4080,3072,2666816,,,0,0,1080,2400,0.54,0.1,,0,0.0,0,0,Beach:0.86|Sea:0.84
+photo_008,PHOTO,DCIM/Camera/,Camera,PXL_20260008.jpg,image/jpeg,4080,3072,2169659,Google,Pixel 9,1,1,1080,2400,0.51,0.17,,0,0.0,0,0,Person:0.93|Smile:0.81
+photo_009,PHOTO,Android/media/com.whatsapp/WhatsApp/Media/WhatsApp Images/,WhatsApp Images,IMG-2026-WA0009.jpg,image/jpeg,1600,1200,2152128,,,0,0,1080,2400,0.36,0.25,,0,0.0,0,0,Food:0.88|Tableware:0.7
+photo_010,PHOTO,Android/media/com.whatsapp/WhatsApp/Media/WhatsApp Images/,WhatsApp Images,IMG-2026-WA0010.jpg,image/jpeg,1600,1200,1928700,,,0,0,1080,2400,0.33,0.12,EXIT,1,0.01,0,0,Dog:0.91|Pet:0.86
+photo_011,PHOTO,Pictures/Telegram/,Telegram,IMG-2026-WA0011.jpg,image/jpeg,1600,1200,2942654,,,0,0,1080,2400,0.48,0.26,,0,0.0,0,0,Sky:0.9|Mountain:0.8
+screenshot_012,SCREENSHOT,Pictures/Screenshots/,Screenshots,Screenshot_20261100-093000_Chrome.png,image/png,1080,2400,1065179,,,0,0,1080,2400,0.8,0.5,10:42 85% Reply Like Share,6,0.3,0,0,
+screenshot_013,SCREENSHOT,Pictures/Screenshots/,Screenshots,Screenshot_20261101-093001_Chrome.png,image/png,1080,2400,781741,,,0,0,1080,2400,0.8,0.5,9:41 Search Home Settings,6,0.3,0,0,
+screenshot_014,SCREENSHOT,Pictures/Screenshots/,Screenshots,Screenshot_20261102-093002_Chrome.png,image/png,1080,2400,862275,,,0,0,1080,2400,0.8,0.5,Type a message last seen today 18:05,6,0.3,0,0,
+screenshot_015,SCREENSHOT,Pictures/Screenshots/,Screenshots,Screenshot_20261103-093003_Chrome.png,image/png,1080,2400,430889,,,0,0,1080,2400,0.8,0.5,"Follow Message 2,341 followers",6,0.3,0,0,
+screenshot_016,SCREENSHOT,Pictures/Screenshots/,Screenshots,Screenshot_20261104-093004_Chrome.png,image/png,1080,2400,696922,,,0,0,1080,2400,0.8,0.5,4:20 PM 62% Notifications View all,6,0.3,0,0,
+screenshot_017,SCREENSHOT,Pictures/Screenshots/,Screenshots,Screenshot_20261105-093005_Chrome.png,image/png,1080,2400,382627,,,0,0,1080,2400,0.8,0.5,10:42 85% Reply Like Share,6,0.3,0,0,
+screenshot_018,SCREENSHOT,Pictures/Screenshots/,Screenshots,Screenshot_20261106-093006_Chrome.png,image/png,1080,2400,878856,,,0,0,1080,2400,0.8,0.5,9:41 Search Home Settings,6,0.3,0,0,
+screenshot_019,SCREENSHOT,Pictures/Screenshots/,Screenshots,Screenshot_20261107-093007_Chrome.png,image/png,1080,2400,607419,,,0,0,1080,2400,0.8,0.5,Type a message last seen today 18:05,6,0.3,0,0,
+screenshot_020,SCREENSHOT,Android/media/com.whatsapp/WhatsApp/Media/WhatsApp Images/,WhatsApp Images,IMG-2026-WA0008.jpg,image/jpeg,1170,2532,400000,,,0,0,1080,2400,0.85,0.5,"Follow Message 2,341 followers",7,0.35,0,0,
+screenshot_021,SCREENSHOT,Android/media/com.whatsapp/WhatsApp/Media/WhatsApp Images/,WhatsApp Images,IMG-2026-WA0009.jpg,image/jpeg,1170,2532,400000,,,0,0,1080,2400,0.85,0.5,4:20 PM 62% Notifications View all,7,0.35,0,0,
+screenshot_022,SCREENSHOT,DCIM/Screenshots/,Screenshots,Screenshot_10.jpg,image/jpeg,1080,2400,500000,,,0,0,1080,2400,,,,,,0,0,
+screenshot_023,SCREENSHOT,DCIM/Screenshots/,Screenshots,Screenshot_11.jpg,image/jpeg,1080,2400,500000,,,0,0,1080,2400,,,,,,0,0,
+meme_024,MEME,Android/media/com.whatsapp/WhatsApp/Media/WhatsApp Images/,WhatsApp Images,meme_0.jpg,image/jpeg,720,720,154800,,,0,0,1080,2400,0.53,0.25,"WHEN YOU SAY ONE MORE EPISODE
+AND IT'S 4AM",2,0.12,1,1,Cartoon:0.72
+meme_025,MEME,Pictures/Telegram/,Telegram,meme_1.jpg,image/jpeg,720,760,78233,,,0,0,1080,2400,0.32,0.25,"NOBODY:
+ME AT 3AM",2,0.12,1,1,Poster:0.6
+meme_026,MEME,Download/,Download,meme_2.jpg,image/jpeg,720,800,119742,,,0,0,1080,2400,0.61,0.25,"ME BEFORE EXAMS
+ME AFTER EXAMS",1,0.12,1,0,Cartoon:0.72
+meme_027,MEME,Pictures/Instagram/,Instagram,meme_3.jpg,image/jpeg,720,720,80916,,,0,0,1080,2400,0.64,0.25,"THAT FEELING WHEN
+WIFI CONNECTS",2,0.12,1,1,Person:0.7
+meme_028,MEME,Android/media/com.whatsapp/WhatsApp/Media/WhatsApp Images/,WhatsApp Images,meme_4.jpg,image/jpeg,720,760,86476,,,0,0,1080,2400,0.45,0.25,MONDAY BE LIKE,2,0.12,1,1,Cartoon:0.72
+meme_029,MEME,Pictures/Telegram/,Telegram,meme_5.jpg,image/jpeg,720,800,178858,,,0,0,1080,2400,0.55,0.25,"HOW IT STARTED
+HOW IT'S GOING",1,0.12,1,0,Poster:0.6
+meme_030,MEME,Download/,Download,meme_6.jpg,image/jpeg,720,720,155638,,,0,0,1080,2400,0.37,0.25,"WHEN YOU SAY ONE MORE EPISODE
+AND IT'S 4AM",2,0.12,1,1,Cartoon:0.72
+meme_031,MEME,Pictures/Instagram/,Instagram,meme_7.jpg,image/jpeg,720,760,153132,,,0,0,1080,2400,0.38,0.25,"NOBODY:
+ME AT 3AM",2,0.12,1,1,Person:0.7
+meme_032,MEME,Android/media/com.whatsapp/WhatsApp/Media/WhatsApp Images/,WhatsApp Images,meme_8.jpg,image/jpeg,720,800,129986,,,0,0,1080,2400,0.58,0.25,"ME BEFORE EXAMS
+ME AFTER EXAMS",1,0.12,1,0,Cartoon:0.72
+meme_033,MEME,Pictures/Telegram/,Telegram,meme_9.jpg,image/jpeg,720,720,78717,,,0,0,1080,2400,0.54,0.25,"THAT FEELING WHEN
+WIFI CONNECTS",2,0.12,1,1,Poster:0.6
+meme_034,MEME,Download/,Download,meme_10.jpg,image/jpeg,720,760,104862,,,0,0,1080,2400,0.51,0.25,MONDAY BE LIKE,2,0.12,1,1,Cartoon:0.72
+meme_035,MEME,Pictures/Instagram/,Instagram,meme_11.jpg,image/jpeg,720,800,124175,,,0,0,1080,2400,0.37,0.25,"HOW IT STARTED
+HOW IT'S GOING",1,0.12,1,0,Person:0.7
+forward_036,FORWARD,Android/media/com.whatsapp/WhatsApp/Media/WhatsApp Images/,WhatsApp Images,IMG-2026-WA0100.jpg,image/jpeg,1080,1350,179471,,,0,0,1080,2400,0.51,0.3,"Good Morning
+Have a blessed day",2,0.24,1,0,Flower:0.82
+forward_037,FORWARD,Android/media/com.whatsapp/WhatsApp/Media/WhatsApp Images/,WhatsApp Images,IMG-2026-WA0101.jpg,image/jpeg,1080,1350,226001,,,0,0,1080,2400,0.49,0.3,"Happy Diwali
+Wishing you joy",2,0.11,0,0,Sky:0.75
+forward_038,FORWARD,Android/media/com.whatsapp/WhatsApp/Media/WhatsApp Images/,WhatsApp Images,IMG-2026-WA0102.jpg,image/jpeg,1080,1350,94663,,,0,0,1080,2400,0.49,0.3,"Good Night
+Sweet dreams",2,0.06,0,0,Flower:0.82
+forward_039,FORWARD,Android/media/com.whatsapp/WhatsApp/Media/WhatsApp Images/,WhatsApp Images,IMG-2026-WA0103.jpg,image/jpeg,1080,1350,162694,,,0,0,1080,2400,0.56,0.3,Shubho Sokal,2,0.06,0,0,Sky:0.75
+forward_040,FORWARD,Android/media/com.whatsapp/WhatsApp/Media/WhatsApp Images/,WhatsApp Images,IMG-2026-WA0104.jpg,image/jpeg,1080,1350,228682,,,0,0,1080,2400,0.75,0.3,"Suprabhat
+Jai Shri Krishna",2,0.11,1,0,Flower:0.82
+forward_041,FORWARD,Android/media/com.whatsapp/WhatsApp/Media/WhatsApp Images/,WhatsApp Images,IMG-2026-WA0105.jpg,image/jpeg,1080,1350,210870,,,0,0,1080,2400,0.56,0.3,"Thought of the day
+Life is beautiful",2,0.23,0,0,Sky:0.75
+forward_042,FORWARD,Android/media/com.whatsapp/WhatsApp/Media/WhatsApp Images/,WhatsApp Images,IMG-2026-WA0106.jpg,image/jpeg,1080,1350,200285,,,0,0,1080,2400,0.46,0.3,"Good Morning
+Have a blessed day",2,0.08,0,0,Flower:0.82
+forward_043,FORWARD,Android/media/com.whatsapp/WhatsApp/Media/WhatsApp Images/,WhatsApp Images,IMG-2026-WA0107.jpg,image/jpeg,1080,1350,227159,,,0,0,1080,2400,0.62,0.3,"Happy Diwali
+Wishing you joy",2,0.2,0,0,Sky:0.75
+forward_044,FORWARD,Android/media/com.whatsapp/WhatsApp/Media/WhatsApp Images/,WhatsApp Images,IMG-2026-WA0108.jpg,image/jpeg,1080,1350,192311,,,0,0,1080,2400,0.76,0.3,"Good Night
+Sweet dreams",2,0.13,1,0,Flower:0.82
+forward_045,FORWARD,Download/,Download,IMG-2026-WA0109.jpg,image/jpeg,1080,1350,137493,,,0,0,1080,2400,0.8,0.3,Shubho Sokal,2,0.08,0,0,Sky:0.75
+forward_046,FORWARD,Download/,Download,IMG-2026-WA0110.jpg,image/jpeg,1080,1350,209372,,,0,0,1080,2400,0.44,0.3,"Suprabhat
+Jai Shri Krishna",2,0.06,0,0,Flower:0.82
+forward_047,FORWARD,Download/,Download,IMG-2026-WA0111.jpg,image/jpeg,1080,1350,108743,,,0,0,1080,2400,0.46,0.3,"Thought of the day
+Life is beautiful",2,0.08,0,0,Sky:0.75
+document_048,DOCUMENT,DCIM/Camera/,Camera,doc_0.jpg,image/jpeg,3000,4000,1827072,Samsung,SM-S928B,1,0,1080,2400,0.76,0.47,"Invoice No 4411
+Subtotal 450.00
+GST 18%
+Total 531.00",4,0.31,0,0,Paper:0.8|Font:0.7
+document_049,DOCUMENT,DCIM/Camera/,Camera,doc_1.jpg,image/jpeg,3000,4000,1381571,Samsung,SM-S928B,1,0,1080,2400,0.78,0.79,"SUPERMART
+Qty Amount
+Total Rs. 882",4,0.46,0,0,Paper:0.8|Font:0.7
+document_050,DOCUMENT,DCIM/Camera/,Camera,doc_2.jpg,image/jpeg,3000,4000,424077,Samsung,SM-S928B,1,0,1080,2400,0.82,0.49,"Electricity Bill
+Due date 12/11/2026
+Amount 1,240",4,0.47,0,0,Paper:0.8|Font:0.7
+document_051,DOCUMENT,DCIM/Camera/,Camera,doc_3.jpg,image/jpeg,3000,4000,1974704,Samsung,SM-S928B,1,0,1080,2400,0.72,0.67,"Payment successful
+UPI Txn ID 22331
+₹ 499",4,0.23,0,0,Paper:0.8|Font:0.7
+document_052,DOCUMENT,DCIM/Camera/,Camera,doc_4.jpg,image/jpeg,3000,4000,1311768,Samsung,SM-S928B,1,0,1080,2400,0.69,0.45,"Meeting notes
+- launch plan
+- budget review
+- hiring",4,0.42,0,0,Paper:0.8|Font:0.7
+document_053,DOCUMENT,DCIM/Camera/,Camera,doc_5.jpg,image/jpeg,3000,4000,1909279,Samsung,SM-S928B,1,0,1080,2400,0.72,0.63,Boarding pass PNR X7Y2Z1 12/12/2026,4,0.25,0,0,Paper:0.8|Font:0.7
+document_054,DOCUMENT,Download/,Download,doc_6.jpg,image/jpeg,1240,1754,623159,,,0,0,1080,2400,0.87,0.55,"Invoice No 4411
+Subtotal 450.00
+GST 18%
+Total 531.00",4,0.39,0,0,Paper:0.8|Font:0.7
+document_055,DOCUMENT,Download/,Download,doc_7.jpg,image/jpeg,1240,1754,1677103,,,0,0,1080,2400,0.7,0.58,"SUPERMART
+Qty Amount
+Total Rs. 882",4,0.25,0,0,Paper:0.8|Font:0.7
+document_056,DOCUMENT,Download/,Download,doc_8.jpg,image/jpeg,1240,1754,1512232,,,0,0,1080,2400,0.88,0.66,"Electricity Bill
+Due date 12/11/2026
+Amount 1,240",4,0.35,0,0,Paper:0.8|Font:0.7
+document_057,DOCUMENT,Android/media/com.whatsapp/WhatsApp/Media/WhatsApp Images/,WhatsApp Images,doc_9.jpg,image/jpeg,1240,1754,634603,,,0,0,1080,2400,0.88,0.76,"Payment successful
+UPI Txn ID 22331
+₹ 499",4,0.45,0,0,Paper:0.8|Font:0.7
+document_058,DOCUMENT,Android/media/com.whatsapp/WhatsApp/Media/WhatsApp Images/,WhatsApp Images,doc_10.jpg,image/jpeg,1240,1754,1044903,,,0,0,1080,2400,0.71,0.53,"Meeting notes
+- launch plan
+- budget review
+- hiring",4,0.37,0,0,Paper:0.8|Font:0.7
+document_059,DOCUMENT,Android/media/com.whatsapp/WhatsApp/Media/WhatsApp Images/,WhatsApp Images,doc_11.jpg,image/jpeg,1240,1754,565165,,,0,0,1080,2400,0.67,0.62,Boarding pass PNR X7Y2Z1 12/12/2026,4,0.22,0,0,Paper:0.8|Font:0.7
