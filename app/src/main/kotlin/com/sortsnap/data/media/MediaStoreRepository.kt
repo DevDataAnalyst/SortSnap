@@ -57,16 +57,22 @@ class MediaStoreRepository @Inject constructor(
         resolver.query(collection, arrayOf(MediaStoreCursorMapper.ID), null, null, null)?.use { it.count } ?: 0
     }
 
-    /** Lightweight id/modified/size for every image: the input to SyncDiff. */
+    /**
+     * Lightweight id/modified/size for every image: the input to SyncDiff.
+     * A null cursor means MediaStore failed (not "no images"), so it throws instead of returning an
+     * empty list, which would otherwise make the sync wipe the whole index, user corrections included.
+     */
     suspend fun stamps(): List<MediaStamp> = withContext(Dispatchers.IO) {
-        resolver.query(collection, MediaStoreCursorMapper.STAMP_PROJECTION, null, null, null)?.use { c ->
+        val cursor = resolver.query(collection, MediaStoreCursorMapper.STAMP_PROJECTION, null, null, null)
+            ?: throw IllegalStateException("MediaStore query returned no cursor")
+        cursor.use { c ->
             val idCol = c.getColumnIndexOrThrow(MediaStoreCursorMapper.ID)
             val modCol = c.getColumnIndexOrThrow(MediaStoreCursorMapper.DATE_MODIFIED)
             val sizeCol = c.getColumnIndexOrThrow(MediaStoreCursorMapper.SIZE)
             buildList(c.count) {
                 while (c.moveToNext()) add(MediaStamp(c.getLong(idCol), c.getLong(modCol), c.getLong(sizeCol)))
             }
-        }.orEmpty()
+        }
     }
 
     /** Full rows for specific ids, chunked to stay under SQLite's variable limit. */

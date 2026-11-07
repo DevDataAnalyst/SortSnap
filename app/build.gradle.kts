@@ -148,6 +148,8 @@ dependencies {
     testImplementation(platform(libs.compose.bom))
     testImplementation(libs.compose.ui.test.junit4)
     testImplementation(libs.paging.common)
+    testImplementation(libs.paging.testing)
+    testImplementation(libs.room.testing)
     testImplementation(libs.work.testing)
 
     androidTestImplementation(libs.androidx.test.ext.junit)

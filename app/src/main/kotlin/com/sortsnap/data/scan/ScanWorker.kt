@@ -53,6 +53,8 @@ class ScanWorker @AssistedInject constructor(
             sync.sync()
         } catch (e: SecurityException) {
             return Result.failure() // permission revoked; the UI shows onboarding again
+        } catch (e: IllegalStateException) {
+            return Result.retry() // MediaStore unavailable (e.g. storage not mounted yet)
         }
 
         val version = ClassifierConfig.VERSION
