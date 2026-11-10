@@ -104,7 +104,10 @@ class ScanScheduler @Inject constructor(
         const val CHARGING_WORK = "sortsnap_scan_when_charging"
         const val TAG = "sortsnap_scan_tag"
         const val CHARGING_TAG = "sortsnap_scan_waiting_for_charger"
-        /** Below the classifier's decision threshold = "unsure". */
-        val UNSURE_BELOW: Float = ClassifierConfig.DEFAULT.minConfidence
+        /**
+         * "Unsure" for re-sorting = every confidence where personal learning may still have a say
+         * (it is consulted below personalMaxBaseConfidence, which is above the decision threshold).
+         */
+        val UNSURE_BELOW: Float = ClassifierConfig.DEFAULT.personalMaxBaseConfidence
     }
 }
