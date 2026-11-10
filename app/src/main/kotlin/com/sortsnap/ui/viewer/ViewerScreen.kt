@@ -121,24 +121,13 @@ fun ViewerScreen(onBack: () -> Unit, viewModel: ViewerViewModel = hiltViewModel(
             }
         }
         if (chromeVisible) {
-            Row(
-                Modifier.fillMaxWidth().background(Color.Black.copy(alpha = 0.4f)).statusBarsPadding().padding(4.dp),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                IconButton(onClick = onBack) {
-                    Icon(Icons.AutoMirrored.Filled.ArrowBack, stringResource(R.string.back), tint = Color.White)
-                }
-                Spacer(Modifier.weight(1f))
-                IconButton(onClick = { showDetails = true }, enabled = current != null, modifier = Modifier.testTag("viewer_info")) {
-                    Icon(Icons.Filled.Info, stringResource(R.string.action_info), tint = Color.White)
-                }
-                IconButton(onClick = { picking = true }, enabled = current != null) {
-                    Icon(Icons.Filled.Edit, stringResource(R.string.action_move_to_category), tint = Color.White)
-                }
-                IconButton(onClick = { current?.let { deleteFlow.start(listOf(it.toDeleteTarget())) } }, enabled = current != null) {
-                    Icon(Icons.Filled.Delete, stringResource(R.string.action_trash), tint = Color.White)
-                }
-            }
+            ViewerTopBar(
+                enabled = current != null,
+                onBack = onBack,
+                onInfo = { showDetails = true },
+                onMove = { picking = true },
+                onTrash = { current?.let { deleteFlow.start(listOf(it.toDeleteTarget())) } },
+            )
         }
         SnackbarHost(snackbar, Modifier.align(Alignment.BottomCenter).navigationBarsPadding())
     }
@@ -146,6 +135,29 @@ fun ViewerScreen(onBack: () -> Unit, viewModel: ViewerViewModel = hiltViewModel(
     if (showDetails && current != null) {
         ModalBottomSheet(onDismissRequest = { showDetails = false }) {
             DetailsSheet(item = current, details = details, onMove = { showDetails = false; picking = true })
+        }
+    }
+}
+
+/** Translucent bar over the photo: back, details ("Why?"), move to category, trash. */
+@Composable
+fun ViewerTopBar(enabled: Boolean, onBack: () -> Unit, onInfo: () -> Unit, onMove: () -> Unit, onTrash: () -> Unit) {
+    Row(
+        Modifier.fillMaxWidth().background(Color.Black.copy(alpha = 0.4f)).statusBarsPadding().padding(4.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        IconButton(onClick = onBack) {
+            Icon(Icons.AutoMirrored.Filled.ArrowBack, stringResource(R.string.back), tint = Color.White)
+        }
+        Spacer(Modifier.weight(1f))
+        IconButton(onClick = onInfo, enabled = enabled, modifier = Modifier.testTag("viewer_info")) {
+            Icon(Icons.Filled.Info, stringResource(R.string.action_info), tint = Color.White)
+        }
+        IconButton(onClick = onMove, enabled = enabled) {
+            Icon(Icons.Filled.Edit, stringResource(R.string.action_move_to_category), tint = Color.White)
+        }
+        IconButton(onClick = onTrash, enabled = enabled) {
+            Icon(Icons.Filled.Delete, stringResource(R.string.action_trash), tint = Color.White)
         }
     }
 }

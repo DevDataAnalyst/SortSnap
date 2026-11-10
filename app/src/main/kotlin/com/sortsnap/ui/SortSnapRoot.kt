@@ -116,6 +116,22 @@ fun SortSnapRoot(onAccessChanged: () -> Unit) {
     MainScaffold(partial = access == PhotoAccess.PARTIAL, onAllowAll = request)
 }
 
+/** The four-tab bottom bar: Gallery, Categories, Review, Settings. */
+@Composable
+fun SortSnapBottomBar(currentRoute: String?, onNavigate: (String) -> Unit) {
+    NavigationBar(Modifier.testTag("bottom_nav")) {
+        TABS.forEach { tab ->
+            NavigationBarItem(
+                selected = currentRoute == tab.route,
+                onClick = { onNavigate(tab.route) },
+                icon = { Icon(tab.icon, contentDescription = null) },
+                label = { Text(stringResource(tab.label)) },
+                modifier = Modifier.testTag("tab_${tab.route}"),
+            )
+        }
+    }
+}
+
 @Composable
 private fun MainScaffold(partial: Boolean, onAllowAll: () -> Unit) {
     val nav = rememberNavController()
@@ -125,21 +141,11 @@ private fun MainScaffold(partial: Boolean, onAllowAll: () -> Unit) {
     Scaffold(
         bottomBar = {
             if (showBar) {
-                NavigationBar(Modifier.testTag("bottom_nav")) {
-                    TABS.forEach { tab ->
-                        NavigationBarItem(
-                            selected = route == tab.route,
-                            onClick = {
-                                nav.navigate(tab.route) {
-                                    popUpTo(nav.graph.findStartDestination().id) { saveState = true }
-                                    launchSingleTop = true
-                                    restoreState = true
-                                }
-                            },
-                            icon = { Icon(tab.icon, contentDescription = null) },
-                            label = { Text(stringResource(tab.label)) },
-                            modifier = Modifier.testTag("tab_${tab.route}"),
-                        )
+                SortSnapBottomBar(currentRoute = route) { target ->
+                    nav.navigate(target) {
+                        popUpTo(nav.graph.findStartDestination().id) { saveState = true }
+                        launchSingleTop = true
+                        restoreState = true
                     }
                 }
             }

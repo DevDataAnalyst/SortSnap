@@ -9,6 +9,16 @@ forwards, documents), 100% on-device.
 
 See [CLAUDE.md](CLAUDE.md) for the architecture, rules and build progress.
 
+## New here? Start with the guide
+
+**[Getting started with SortSnap](docs/GETTING_STARTED.md)** walks through every screen in nine steps.
+
+| Your photos, clutter hidden | Smart albums | "Why?" for every picture | Free up space |
+| --- | --- | --- | --- |
+| <img src="docs/screenshots/02-gallery-photos-only.png" width="190"> | <img src="docs/screenshots/04-categories.png" width="190"> | <img src="docs/screenshots/06-viewer-why.png" width="190"> | <img src="docs/screenshots/08-review.png" width="190"> |
+
+<sub>Real app screens rendered with sample illustrations (see the guide for how they are generated).</sub>
+
 ## How it decides (classifier v3)
 
 1. **Metadata first pass** (every image, no pixels beyond a 256 px thumbnail): folders, file names,
@@ -64,5 +74,6 @@ Bump `ClassifierConfig.VERSION` when you change them so devices reclassify.
 | `:baselineprofile` | Baseline Profile generator (startup + gallery scroll) |
 
 ## Docs
+- [Getting started (user guide)](docs/GETTING_STARTED.md)
 - [Release signing](docs/SIGNING.md)
 - [Play Store checklist](docs/PLAY_STORE_CHECKLIST.md)

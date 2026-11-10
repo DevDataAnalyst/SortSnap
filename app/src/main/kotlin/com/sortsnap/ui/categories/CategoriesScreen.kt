@@ -64,6 +64,13 @@ class CategoriesViewModel @Inject constructor(images: ImageDao) : ViewModel() {
 @Composable
 fun CategoriesScreen(onOpenCategory: (Category) -> Unit, viewModel: CategoriesViewModel = hiltViewModel()) {
     val tiles by viewModel.tiles.collectAsStateWithLifecycle()
+    CategoriesContent(tiles = tiles, onOpenCategory = onOpenCategory)
+}
+
+/** Stateless body of [CategoriesScreen]; [tiles] is null while the first query runs. */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun CategoriesContent(tiles: List<CategoryTile>?, onOpenCategory: (Category) -> Unit) {
     Scaffold(topBar = { TopAppBar(title = { Text(stringResource(R.string.categories_title)) }) }) { padding ->
         val list = tiles
         if (list == null) {
