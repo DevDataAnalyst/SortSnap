@@ -70,6 +70,25 @@ interface ImageDao {
         blurScore: Double?, scannedAt: Long, version: Int, mlProcessed: Boolean,
     ): Int
 
+    /** Images the user sorted by hand, newest first, with their stored evidence (personal learning). */
+    @Query(
+        """SELECT userOverride AS category, signalsJson FROM images
+           WHERE userOverride IS NOT NULL AND userOverride != 'OTHER' AND signalsJson IS NOT NULL AND signalsJson != '[]'
+           ORDER BY lastScannedAt DESC, mediaId DESC LIMIT :limit""",
+    )
+    suspend fun labelledExamples(limit: Int): List<LabelledRow>
+
+    /** Hand-sorted images that personal learning can use. */
+    @Query(
+        """SELECT COUNT(*) FROM images WHERE userOverride IS NOT NULL AND userOverride != 'OTHER'
+           AND signalsJson IS NOT NULL AND signalsJson != '[]'""",
+    )
+    fun labelledCountFlow(): Flow<Int>
+
+    /** "Re-sort unsure pictures": requeue only uncorrected rows the classifier was unsure about. */
+    @Query("UPDATE images SET classifierVersion = 0 WHERE userOverride IS NULL AND (category = 'OTHER' OR confidence < :below)")
+    suspend fun requeueUnsure(below: Float): Int
+
     /** "Rescan library": requeue everything the user has not corrected. */
     @Query("UPDATE images SET classifierVersion = 0 WHERE userOverride IS NULL")
     suspend fun requeueAll()

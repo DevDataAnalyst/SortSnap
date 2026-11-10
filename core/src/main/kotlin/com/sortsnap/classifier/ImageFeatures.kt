@@ -52,7 +52,18 @@ data class VisualFeatures(
     val meanBrightness: Float,
     /** Fraction (0..1) of pixels that fall into the dominant luminance bin: high for flat backgrounds. */
     val backgroundUniformity: Float,
-)
+    /**
+     * Hasler-Süsstrunk colourfulness scaled to 0..1 (0 = grey, ~0.15 = muted, 0.5+ = vivid), or
+     * [UNKNOWN] when it was not measured (older rows, fixtures without the column).
+     */
+    val colorfulness: Float = UNKNOWN,
+) {
+    val hasColorfulness: Boolean get() = colorfulness >= 0f
+
+    companion object {
+        const val UNKNOWN = -1f
+    }
+}
 
 data class TextFeatures(
     val fullText: String,

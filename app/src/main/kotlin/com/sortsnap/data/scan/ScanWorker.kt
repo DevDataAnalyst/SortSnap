@@ -10,6 +10,9 @@ import androidx.work.WorkerParameters
 import androidx.work.workDataOf
 import com.sortsnap.classifier.Category
 import com.sortsnap.classifier.ClassifierConfig
+import com.sortsnap.classifier.LabelledExample
+import com.sortsnap.classifier.PersonalModel
+import com.sortsnap.classifier.SignalCodec
 import com.sortsnap.data.db.FolderPriorDao
 import com.sortsnap.data.db.ImageDao
 import com.sortsnap.data.settings.SettingsRepository
@@ -24,7 +27,8 @@ import kotlinx.coroutines.coroutineScope
  *
  * - Resumable: the last processed mediaId is persisted after every batch, so a killed worker
  *   continues where it stopped.
- * - Rows with a userOverride are never selected or updated (guarded in SQL as well).
+ * - Rows with a userOverride are never selected or updated (guarded in SQL as well); they are read
+ *   only as training examples for the [PersonalModel].
  * - The initial full scan only runs while charging or above 30% battery unless forced.
  */
 @HiltWorker
@@ -61,6 +65,7 @@ class ScanWorker @AssistedInject constructor(
         val appSettings = settings.current()
         val fallback = appSettings.unsureCategory
         val folderPriors: Map<String, Category> = priors.active().associate { it.bucket to it.category }
+        val personal = loadPersonalModel()
         val total = images.pendingCount(version)
         var done = 0L
         var cursor = state.cursor()
@@ -79,7 +84,7 @@ class ScanWorker @AssistedInject constructor(
                 val results = coroutineScope {
                     batch.map { record ->
                         async {
-                            runCatching { classifierService.classify(record, folderPriors[record.bucket], fallback) }.getOrNull()
+                            runCatching { classifierService.classify(record, folderPriors[record.bucket], fallback, personal) }.getOrNull()
                         }
                     }.awaitAll()
                 }
@@ -120,6 +125,14 @@ class ScanWorker @AssistedInject constructor(
         settings.setIndexedClassifierVersion(version)
         return Result.success()
     }
+
+    /** What the user taught by moving/confirming images. Built once per run, off the main thread. */
+    private suspend fun loadPersonalModel(): PersonalModel? = runCatching {
+        val config = ClassifierConfig.DEFAULT
+        val rows = images.labelledExamples(config.personalMaxExamples)
+        PersonalModel.build(rows.map { LabelledExample(SignalCodec.decode(it.signalsJson), it.category) }, config)
+            .takeUnless { it.isEmpty }
+    }.getOrNull()
 
     private fun batteryAllowsFullScan(): Boolean {
         val status = applicationContext.registerReceiver(null, IntentFilter(Intent.ACTION_BATTERY_CHANGED)) ?: return true

@@ -66,7 +66,8 @@ class ConfusionMatrix(val categories: List<Category> = Category.entries) {
 /**
  * Reads/writes evaluation fixtures as CSV. Columns (header required):
  * id,label,relative_path,bucket,display_name,mime,width,height,size,exif_make,exif_model,focal,gps,
- * screen_w,screen_h,brightness,uniformity,text,line_count,text_coverage,top_band,bottom_band,labels
+ * screen_w,screen_h,brightness,uniformity,text,line_count,text_coverage,top_band,bottom_band,labels,
+ * colorfulness (optional; blank = not measured)
  *
  * `labels` is `Name:0.93|Other:0.71`. Empty ML columns mean "no ML features".
  */
@@ -75,7 +76,7 @@ object FixtureCsv {
     val HEADER = listOf(
         "id", "label", "relative_path", "bucket", "display_name", "mime", "width", "height", "size",
         "exif_make", "exif_model", "focal", "gps", "screen_w", "screen_h", "brightness", "uniformity",
-        "text", "line_count", "text_coverage", "top_band", "bottom_band", "labels",
+        "text", "line_count", "text_coverage", "top_band", "bottom_band", "labels", "colorfulness",
     )
 
     fun parse(content: String): List<LabeledFeatures> {
@@ -112,7 +113,9 @@ object FixtureCsv {
                         hasGps = bool("gps"),
                     ),
                     screen = if (screenW > 0 && screenH > 0) ScreenSize(screenW, screenH) else null,
-                    visual = brightness?.let { VisualFeatures(it, flt("uniformity") ?: 0f) },
+                    visual = brightness?.let {
+                        VisualFeatures(it, flt("uniformity") ?: 0f, flt("colorfulness") ?: VisualFeatures.UNKNOWN)
+                    },
                     text = if (hasText) {
                         TextFeatures(
                             fullText = col("text"),

@@ -48,6 +48,16 @@ class ScanScheduler @Inject constructor(
         enqueue(full = true, force = false, policy = ExistingWorkPolicy.REPLACE)
     }
 
+    /**
+     * Re-decides only the images the classifier was unsure about, so what the user taught by sorting
+     * (personal learning, folder rules) is applied to them. Much cheaper than a full rescan.
+     */
+    suspend fun resortUnsure(): Int {
+        val n = images.requeueUnsure(UNSURE_BELOW)
+        if (n > 0) enqueue(full = false, force = false, policy = ExistingWorkPolicy.APPEND_OR_REPLACE)
+        return n
+    }
+
     /** Settings > Scan now anyway: ignores the battery rule. */
     fun scanNowAnyway() = enqueue(full = true, force = true, policy = ExistingWorkPolicy.REPLACE)
 
@@ -94,5 +104,7 @@ class ScanScheduler @Inject constructor(
         const val CHARGING_WORK = "sortsnap_scan_when_charging"
         const val TAG = "sortsnap_scan_tag"
         const val CHARGING_TAG = "sortsnap_scan_waiting_for_charger"
+        /** Below the classifier's decision threshold = "unsure". */
+        val UNSURE_BELOW: Float = ClassifierConfig.DEFAULT.minConfidence
     }
 }

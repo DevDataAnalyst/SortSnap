@@ -25,6 +25,16 @@ object SignalExplainer {
         UiChromeRule.id -> "Shows app buttons or a status bar"
         PhotoLabelRule.id -> "Contains ${signal.detail?.lowercase() ?: "people or scenery"} with little text"
         HeavyTextRule.id -> "Mostly text, unlike a camera photo"
+        LongScreenshotRule.id -> "A scrolling screenshot (screen width, extra tall)"
+        LongScreenshotRule.TALL_ID -> "Very tall image, like a long capture"
+        FlatGraphicRule.id -> "Large flat areas, like a graphic rather than a photo"
+        DocumentKeywordRule.id -> "Contains document words (notes, ticket, certificate…)"
+        ListLayoutRule.id -> "Laid out as a list or notes"
+        DocumentLabelRule.id -> "Looks like ${signal.detail?.lowercase() ?: "paper"}"
+        MemePhraseRule.id -> "Uses meme phrasing (\"be like\", \"POV\"…)"
+        SocialWatermarkRule.id -> "Has a social media handle or meme-page watermark"
+        GrayscaleDocumentRule.id -> "Black-and-white text, like a scan or print-out"
+        PersonalModel.SIGNAL_ID -> "Similar to ${signal.detail ?: "several"} images you sorted yourself"
         SortSnapClassifier.FOLDER_PRIOR_ID -> "You often sort the \"${signal.detail ?: "this"}\" folder this way"
         else -> signal.id.replace('_', ' ').replaceFirstChar { it.uppercase() }
     }

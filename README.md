@@ -9,6 +9,23 @@ forwards, documents), 100% on-device.
 
 See [CLAUDE.md](CLAUDE.md) for the architecture, rules and build progress.
 
+## How it decides (classifier v3)
+
+1. **Metadata first pass** (every image, no pixels beyond a 256 px thumbnail): folders, file names,
+   screen-size match, scrolling-screenshot shape, camera EXIF, chat-app and download folders, flat
+   synthetic graphics.
+2. **On-device ML pass** (only when unsure): ML Kit OCR + labels feed rules for meme captions and
+   meme phrasing, @handle watermarks, greetings and festival wishes, receipts, IDs/tickets/notes,
+   bullet lists, paper/whiteboard labels, black-and-white scans, app UI chrome.
+3. **Learns from you**: every picture you move or confirm keeps the evidence the classifier saw.
+   New pictures whose evidence looks like ones you sorted (Jaccard similarity of evidence
+   fingerprints, at least 3 similar examples, 70 % agreement) get a bounded vote for your choice,
+   only when the classifier itself is unsure. Settings › "Learns from you" re-sorts unsure pictures
+   with what it has learned. Per-folder learned rules still apply on top.
+
+Every decision is explainable in the viewer's "Why?" list, including "Similar to 5 images you
+sorted yourself".
+
 ## Build
 
 Requirements: JDK 17+ (21 tested), Android SDK with `platforms;android-37.2` and
@@ -20,6 +37,7 @@ Requirements: JDK 17+ (21 tested), Android SDK with `platforms;android-37.2` and
 ./gradlew testDebugUnitTest             # app unit tests incl. Compose UI tests (Robolectric, no emulator)
 ./gradlew :core:koverHtmlReport         # coverage report: core/build/reports/kover/html
 ./gradlew bundleRelease                 # release AAB (R8 + resource shrinking)
+./gradlew assembleRelease               # one universal APK (all ABIs, no splits): app/build/outputs/apk/release/app-release.apk
 ```
 
 Install the debug build: `adb install -r app/build/outputs/apk/debug/app-debug.apk`

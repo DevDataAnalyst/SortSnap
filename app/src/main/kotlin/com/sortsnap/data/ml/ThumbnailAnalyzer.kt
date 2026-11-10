@@ -14,7 +14,7 @@ import javax.inject.Singleton
 
 data class ThumbnailStats(val dHash: Long, val blurScore: Double, val visual: VisualFeatures)
 
-/** Decodes tiny thumbnails (never full-size images) for hashing, blur and brightness statistics. */
+/** Decodes tiny thumbnails (never full-size images) for hashing, blur, brightness and colour statistics. */
 @Singleton
 class ThumbnailAnalyzer @Inject constructor() {
 
@@ -29,7 +29,7 @@ class ThumbnailAnalyzer @Inject constructor() {
             return ThumbnailStats(
                 dHash = ImageMath.dHash(gray, w, h),
                 blurScore = ImageMath.laplacianVariance(gray, w, h),
-                visual = ImageMath.visualFeatures(gray),
+                visual = ImageMath.visualFeatures(gray, pixels),
             )
         } finally {
             bitmap.recycle()

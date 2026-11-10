@@ -6,6 +6,10 @@ import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.common.truth.Truth.assertThat
 import com.sortsnap.classifier.Category
+import com.sortsnap.classifier.LabelledExample
+import com.sortsnap.classifier.PersonalModel
+import com.sortsnap.classifier.Signal
+import com.sortsnap.classifier.SignalCodec
 import com.sortsnap.data.db.ImageRecord
 import com.sortsnap.data.db.SortSnapDatabase
 import com.sortsnap.data.media.MediaStoreRepository
@@ -75,6 +79,41 @@ class DatabaseTest {
         assertThat(db.priors().active()).isEmpty()
         corrections.moveToCategory(listOf(6L), Category.MEME) // 6 < 5 + 5: stays dismissed
         assertThat(db.priors().active()).isEmpty()
+    }
+
+    @Test fun handSortedImagesBecomePersonalLearningExamples() = runTest {
+        val evidence = SignalCodec.encode(listOf(Signal("chat_app_folder", mapOf(Category.MEME to 0.6f), detail = "Telegram")))
+        db.images().insertAll(
+            listOf(
+                record(1).copy(signalsJson = evidence),
+                record(2).copy(signalsJson = evidence),
+                record(3).copy(signalsJson = evidence),
+                record(4).copy(signalsJson = "[]"), // no evidence: useless for learning
+                record(5).copy(signalsJson = evidence), // not hand-sorted
+            ),
+        )
+        corrections.moveToCategory(listOf(1L, 2L, 4L), Category.FORWARD)
+        corrections.confirm(3L) // "Is this right?" → Yes also teaches (as OTHER here, which is ignored)
+        val rows = db.images().labelledExamples(100)
+        assertThat(rows.map { it.category }).containsExactly(Category.FORWARD, Category.FORWARD)
+        assertThat(db.images().labelledCountFlow().first()).isEqualTo(2)
+
+        val model = PersonalModel.build(rows.map { LabelledExample(SignalCodec.decode(it.signalsJson), it.category) })
+        assertThat(model.exampleCount).isEqualTo(2)
+    }
+
+    @Test fun resortUnsureRequeuesOnlyUnsureUncorrectedRows() = runTest {
+        db.images().insertAll(
+            listOf(
+                record(1, category = Category.OTHER).copy(classifierVersion = 3, confidence = 0.4f),
+                record(2, category = Category.PHOTO).copy(classifierVersion = 3, confidence = 0.95f),
+                record(3, category = Category.MEME).copy(classifierVersion = 3, confidence = 0.5f),
+                record(4, category = Category.OTHER).copy(classifierVersion = 3, confidence = 0.4f),
+            ),
+        )
+        db.images().setOverride(listOf(4L), Category.DOCUMENT)
+        assertThat(db.images().requeueUnsure(0.55f)).isEqualTo(2)
+        assertThat(db.images().pendingBatch(3, 0, 50).map { it.mediaId }).containsExactly(1L, 3L)
     }
 
     @Test fun movingToSameCategoryLogsNoCorrection() = runTest {

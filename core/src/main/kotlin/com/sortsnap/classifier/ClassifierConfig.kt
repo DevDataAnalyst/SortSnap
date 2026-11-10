@@ -85,6 +85,52 @@ data class ClassifierConfig(
     val noTextForwardPenalty: Float = -1.0f,
     val noTextDocumentPenalty: Float = -1.0f,
 
+    // ---- v3: layout and colour (first pass) ----
+    /** Same width as this phone's screen but much taller: a scrolling / long screenshot. */
+    val longScreenshotWeight: Float = 2.0f,
+    /** Height must exceed the screen's long side by this factor to count as a scrolling capture. */
+    val longScreenshotMinStretch: Float = 1.15f,
+    /** Very tall image with no camera EXIF (aspect >= this): a long capture from another phone. */
+    val tallAspectRatio: Float = 2.6f,
+    val tallAspectScreenshotWeight: Float = 1.0f,
+    val tallAspectDocumentWeight: Float = 0.3f,
+    /** Large flat areas and no camera EXIF: a synthetic graphic rather than a camera photo. */
+    val flatGraphicMinUniformity: Float = 0.55f,
+    val flatGraphicPhotoPenalty: Float = -1.0f,
+
+    // ---- v3: text understanding (ML pass) ----
+    val documentKeywordStrongWeight: Float = 2.0f,
+    val documentKeywordWeakWeight: Float = 0.8f,
+    val documentKeywordStrongMinHits: Int = 2,
+    /** At least this many bullet / numbered lines reads as notes or a list. */
+    val listLayoutMinLines: Int = 3,
+    val listLayoutWeight: Float = 1.2f,
+    val documentLabelWeight: Float = 1.2f,
+    val memePhraseWeight: Float = 1.2f,
+    val socialWatermarkWeight: Float = 0.8f,
+    /** Near-greyscale page with several lines of text: a scan, print-out or receipt. */
+    val grayscaleMaxColorfulness: Float = 0.08f,
+    val grayscaleMinLines: Int = 3,
+    val grayscaleDocumentWeight: Float = 1.0f,
+
+    // ---- v3: personal learning from the user's own sorting ----
+    /** Upper bound of the "similar to images you sorted" evidence (scaled by agreement). */
+    val personalWeight: Float = 3.0f,
+    /**
+     * Personal learning only settles close calls: it is consulted when the classifier's own
+     * confidence is below this, so confidently classified images (camera EXIF, Screenshots folder)
+     * never flip because of a handful of unusual hand-sorted pictures.
+     */
+    val personalMaxBaseConfidence: Float = 0.7f,
+    /** Jaccard similarity of evidence fingerprints needed to count as a similar image. */
+    val personalMinSimilarity: Float = 0.75f,
+    /** Hand-sorted similar images needed before personal learning has a say. */
+    val personalMinSupport: Int = 3,
+    /** Share of the similarity-weighted vote the winning category needs. */
+    val personalMinAgreement: Float = 0.7f,
+    /** Most recent hand-sorted images the model keeps (bounds memory and time on huge libraries). */
+    val personalMaxExamples: Int = 5000,
+
     // ---- Clean-up ----
     /** Variance of Laplacian on a 256px thumbnail below which a photo counts as blurry. */
     val blurVarianceThreshold: Double = 60.0,
@@ -92,8 +138,11 @@ data class ClassifierConfig(
     val nearDuplicateMaxDistance: Int = 4,
 ) {
     companion object {
-        /** v1 = rule-based first pass, v2 = ML second pass + fusion. */
-        const val VERSION: Int = 2
+        /**
+         * v1 = rule-based first pass, v2 = ML second pass + fusion,
+         * v3 = layout/colour rules, document/meme text understanding, personal learning.
+         */
+        const val VERSION: Int = 3
 
         val DEFAULT = ClassifierConfig()
     }

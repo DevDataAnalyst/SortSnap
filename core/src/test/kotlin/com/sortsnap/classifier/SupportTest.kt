@@ -86,7 +86,7 @@ class SignalExplainerTest {
     @Test fun everyBuiltInSignalHasPlainEnglish() {
         val ids = DefaultRules.ALL.map { it.id } + listOf(
             ScreenshotDimensionRule.DEVICE_ID, ScreenshotDimensionRule.COMMON_ID, MemeCaptionRule.SINGLE_ID,
-            SortSnapClassifier.FOLDER_PRIOR_ID,
+            SortSnapClassifier.FOLDER_PRIOR_ID, LongScreenshotRule.TALL_ID, PersonalModel.SIGNAL_ID,
         )
         ids.filter { it != ScreenshotDimensionRule.id }.forEach { id ->
             val text = SignalExplainer.explain(Signal(id, emptyMap()))

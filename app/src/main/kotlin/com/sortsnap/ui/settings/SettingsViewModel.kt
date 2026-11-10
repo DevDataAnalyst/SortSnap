@@ -35,6 +35,10 @@ class SettingsViewModel @Inject constructor(
     val learnedRules: StateFlow<List<FolderPriorEntity>> = priors.activeFlow()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
+    /** How many hand-sorted pictures personal learning is using. */
+    val personalExamples: StateFlow<Int> = images.labelledCountFlow()
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), 0)
+
     val debug: StateFlow<DebugStats?> = combine(
         scanState.statsFlow, images.countFlow(), images.pendingCountFlow(ClassifierConfig.VERSION),
     ) { stats, indexed, queue -> DebugStats(stats, indexed, queue) }
@@ -49,6 +53,7 @@ class SettingsViewModel @Inject constructor(
     fun setDynamic(v: Boolean) = viewModelScope.launch { settings.setDynamicColor(v) }
     fun rescan() = viewModelScope.launch { scheduler.rescanLibrary() }
     fun scanNowAnyway() = scheduler.scanNowAnyway()
+    fun resortUnsure(onDone: (Int) -> Unit) = viewModelScope.launch { onDone(scheduler.resortUnsure()) }
     fun deleteRule(bucket: String) = viewModelScope.launch { priors.dismiss(bucket) }
     fun clearRules() = viewModelScope.launch { priors.dismissAll() }
 }
