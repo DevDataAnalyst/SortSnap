@@ -124,7 +124,7 @@ Rules:
   `DocumentLabelRule`, `MemePhraseRule`, `SocialWatermarkRule`, `GrayscaleDocumentRule` (new
   Hasler-Süsstrunk `colorfulness` in `VisualFeatures`); more festival/devotional greetings. Single
   universal APK (`splits.abi` disabled) via `assembleRelease`. Synthetic eval: 0.917 → 0.983.
-- **User guide + screenshots** — `docs/GETTING_STARTED.md` (9 steps) and a README teaser. Screens are
+- **User guide + screenshots** — a 9-step "Getting started" section in `README.md` (screenshot beside each step). Screens are
   rendered by `GuideScreenshots` (Robolectric native graphics, `-PguideDir=docs/screenshots`) using sample
   illustrations from `tools/generate_sample_images.py`. To make that possible, screens were split into
   stateless `*Content` composables (`GalleryContent`, `CategoriesContent`, `ReviewContent`,

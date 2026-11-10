@@ -74,7 +74,7 @@ import org.robolectric.annotation.GraphicsMode
 import java.io.File
 
 /**
- * Renders the screens used in the README's getting-started guide to PNG files, using the real
+ * Renders the screens used in the README's "Getting started" section to PNG files, using the real
  * composables with sample data (Robolectric native graphics, no emulator).
  *
  * Writes to `app/build/guide-screenshots` by default. To refresh the committed images:
