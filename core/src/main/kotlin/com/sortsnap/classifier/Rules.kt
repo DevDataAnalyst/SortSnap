@@ -145,6 +145,56 @@ object DownloadsRule : ClassifierRule {
 }
 
 // ---------------------------------------------------------------------------------------------
+// v3 first pass: layout and colour (metadata + thumbnail statistics, still no ML).
+// ---------------------------------------------------------------------------------------------
+
+/**
+ * Scrolling ("long") screenshots: exactly this phone's screen width but much taller than the
+ * screen. Very tall images without camera EXIF from other phones get a weaker version.
+ */
+object LongScreenshotRule : ClassifierRule {
+    override val id = "long_screenshot"
+    const val TALL_ID = "tall_capture"
+
+    override fun evaluate(features: ImageFeatures, config: ClassifierConfig): Signal? {
+        val w = features.width
+        val h = features.height
+        if (w <= 0 || h <= 0 || h <= w) return null
+        val screen = features.screen
+        if (screen != null) {
+            val shortSide = minOf(screen.width, screen.height)
+            val longSide = maxOf(screen.width, screen.height)
+            if (w == shortSide && h >= longSide * config.longScreenshotMinStretch) {
+                return signal(SCREENSHOT to config.longScreenshotWeight)
+            }
+        }
+        if (features.exif.hasCameraMakeModel) return null
+        if (h.toFloat() / w >= config.tallAspectRatio) {
+            return Signal(
+                TALL_ID,
+                mapOf(SCREENSHOT to config.tallAspectScreenshotWeight, DOCUMENT to config.tallAspectDocumentWeight),
+                source,
+            )
+        }
+        return null
+    }
+}
+
+/**
+ * Big flat areas (one luminance bin dominates) and no camera EXIF: a synthetic graphic such as an
+ * app screen, a card or a quote image. Camera photos almost never look like this.
+ */
+object FlatGraphicRule : ClassifierRule {
+    override val id = "flat_graphic"
+    override fun evaluate(features: ImageFeatures, config: ClassifierConfig): Signal? {
+        val visual = features.visual ?: return null
+        if (!features.exif.isEmpty || FolderMatchers.isCameraFolder(features)) return null
+        if (visual.backgroundUniformity < config.flatGraphicMinUniformity) return null
+        return signal(PHOTO to config.flatGraphicPhotoPenalty)
+    }
+}
+
+// ---------------------------------------------------------------------------------------------
 // Second pass: ML Kit derived rules. They only fire when text/labels are present.
 // ---------------------------------------------------------------------------------------------
 
@@ -274,14 +324,96 @@ object NoTextRule : ClassifierRule {
     }
 }
 
+// ---------------------------------------------------------------------------------------------
+// v3 ML pass: deeper text understanding and colour.
+// ---------------------------------------------------------------------------------------------
+
+/** Paperwork beyond receipts: notes, IDs, tickets, prescriptions, school work. */
+object DocumentKeywordRule : ClassifierRule {
+    override val id = "document_keywords"
+    override val source = SignalSource.ML
+    override fun evaluate(features: ImageFeatures, config: ClassifierConfig): Signal? {
+        val text = features.text ?: return null
+        val hits = TextAnalysis.documentHits(text.fullText)
+        return when {
+            hits >= config.documentKeywordStrongMinHits -> signal(DOCUMENT to config.documentKeywordStrongWeight)
+            hits == 1 -> signal(DOCUMENT to config.documentKeywordWeakWeight)
+            else -> null
+        }
+    }
+}
+
+/** Several bullet, numbered or checkbox lines: notes, lists, to-dos. */
+object ListLayoutRule : ClassifierRule {
+    override val id = "list_layout"
+    override val source = SignalSource.ML
+    override fun evaluate(features: ImageFeatures, config: ClassifierConfig): Signal? {
+        val text = features.text ?: return null
+        val lines = TextAnalysis.listLines(text.fullText)
+        return if (lines >= config.listLayoutMinLines) signal(DOCUMENT to config.listLayoutWeight, detail = "$lines") else null
+    }
+}
+
+/** ML Kit sees paper, a receipt, handwriting or a whiteboard. */
+object DocumentLabelRule : ClassifierRule {
+    override val id = "document_labels"
+    override val source = SignalSource.ML
+    val LABELS = setOf("paper", "document", "receipt", "handwriting", "whiteboard", "menu", "newspaper", "publication", "book")
+    override fun evaluate(features: ImageFeatures, config: ClassifierConfig): Signal? {
+        val best = features.labels.orEmpty().filter { it.name.lowercase() in LABELS }.maxByOrNull { it.confidence }
+            ?: return null
+        return signal(DOCUMENT to config.documentLabelWeight * best.confidence, detail = best.name)
+    }
+}
+
+/** Meme phrasing: "be like", "nobody:", "POV", "how it started"… */
+object MemePhraseRule : ClassifierRule {
+    override val id = "meme_phrases"
+    override val source = SignalSource.ML
+    override fun evaluate(features: ImageFeatures, config: ClassifierConfig): Signal? {
+        val text = features.text ?: return null
+        if (TextAnalysis.memePhraseHits(text.fullText) == 0) return null
+        if (TextAnalysis.uiChromeHits(text.fullText) >= config.uiChromeMinHits) return null // a chat screenshot quoting a meme
+        return signal(MEME to config.memePhraseWeight)
+    }
+}
+
+/** "@handle" or meme-page watermark in the image. */
+object SocialWatermarkRule : ClassifierRule {
+    override val id = "social_watermark"
+    override val source = SignalSource.ML
+    override fun evaluate(features: ImageFeatures, config: ClassifierConfig): Signal? {
+        val text = features.text ?: return null
+        if (TextAnalysis.socialWatermarkHits(text.fullText) == 0) return null
+        return signal(MEME to config.socialWatermarkWeight)
+    }
+}
+
+/** Almost no colour and several lines of text: a scan, print-out or receipt. */
+object GrayscaleDocumentRule : ClassifierRule {
+    override val id = "grayscale_text"
+    override val source = SignalSource.ML
+    override fun evaluate(features: ImageFeatures, config: ClassifierConfig): Signal? {
+        val text = features.text ?: return null
+        val visual = features.visual ?: return null
+        if (!visual.hasColorfulness || visual.colorfulness > config.grayscaleMaxColorfulness) return null
+        if (text.lineCount < config.grayscaleMinLines) return null
+        if (TextAnalysis.uiChromeHits(text.fullText) >= config.uiChromeMinHits) return null
+        return signal(DOCUMENT to config.grayscaleDocumentWeight)
+    }
+}
+
 object DefaultRules {
     val FIRST_PASS: List<ClassifierRule> = listOf(
         ScreenshotFolderRule, ScreenshotFilenameRule, ScreenshotDimensionRule, PngMimeRule, NoCameraExifRule,
         ChatAppRule, CameraFolderRule, CameraExifRule, FocalLengthRule, GpsRule, DownloadsRule,
+        LongScreenshotRule, FlatGraphicRule,
     )
     val ML_PASS: List<ClassifierRule> = listOf(
         MemeCaptionRule, MemeLabelRule, GreetingRule, ReceiptKeywordRule, DocumentLayoutRule, UiChromeRule,
         PhotoLabelRule, HeavyTextRule, NoTextRule,
+        DocumentKeywordRule, ListLayoutRule, DocumentLabelRule, MemePhraseRule, SocialWatermarkRule,
+        GrayscaleDocumentRule,
     )
     val ALL: List<ClassifierRule> = FIRST_PASS + ML_PASS
 }

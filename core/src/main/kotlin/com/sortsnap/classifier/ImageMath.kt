@@ -56,6 +56,43 @@ object ImageMath {
         return sumSq / n - mean * mean
     }
 
+    /**
+     * Hasler & Süsstrunk (2003) colourfulness of packed ARGB pixels, divided by [COLORFULNESS_SCALE]
+     * and clamped to 0..1. Grey scans and printed pages score near 0; camera photos of people and
+     * places are usually 0.2-0.6; saturated graphics go higher.
+     */
+    fun colorfulness(argb: IntArray): Float {
+        if (argb.isEmpty()) return 0f
+        var sumRg = 0.0
+        var sumYb = 0.0
+        var sumRg2 = 0.0
+        var sumYb2 = 0.0
+        for (p in argb) {
+            val r = (p shr 16) and 0xFF
+            val g = (p shr 8) and 0xFF
+            val b = p and 0xFF
+            val rg = (r - g).toDouble()
+            val yb = 0.5 * (r + g) - b
+            sumRg += rg; sumYb += yb
+            sumRg2 += rg * rg; sumYb2 += yb * yb
+        }
+        val n = argb.size.toDouble()
+        val meanRg = sumRg / n
+        val meanYb = sumYb / n
+        val varRg = (sumRg2 / n - meanRg * meanRg).coerceAtLeast(0.0)
+        val varYb = (sumYb2 / n - meanYb * meanYb).coerceAtLeast(0.0)
+        val m = kotlin.math.sqrt(varRg + varYb) + 0.3 * kotlin.math.sqrt(meanRg * meanRg + meanYb * meanYb)
+        return (m / COLORFULNESS_SCALE).toFloat().coerceIn(0f, 1f)
+    }
+
+    const val COLORFULNESS_SCALE = 150.0
+
+    /** Luminance statistics plus colourfulness (when ARGB pixels are available). */
+    fun visualFeatures(gray: IntArray, argb: IntArray?): VisualFeatures {
+        val base = visualFeatures(gray)
+        return if (argb == null || argb.isEmpty()) base else base.copy(colorfulness = colorfulness(argb))
+    }
+
     fun visualFeatures(gray: IntArray): VisualFeatures {
         if (gray.isEmpty()) return VisualFeatures(0f, 0f)
         val bins = IntArray(16)

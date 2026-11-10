@@ -114,6 +114,29 @@ Rules:
   content descriptions, adaptive + monochrome icon, strings in `strings.xml`, R8 + resource shrinking,
   keep rules, `docs/SIGNING.md`, `docs/PLAY_STORE_CHECKLIST.md`. `bundleRelease` and `assembleRelease`
   build; merged manifest verified to have no INTERNET permission.
+- **Smarter sorting (classifier v3, app 1.1.0)** — Personal learning: `PersonalModel` (`:core`) learns
+  from every hand-sorted picture (userOverride rows keep their `signalsJson`): evidence fingerprints,
+  Jaccard ≥ 0.75, ≥ 3 similar examples, ≥ 70 % agreement, weight ≤ 3.0, consulted only when the
+  classifier's own confidence < 0.7 (so confident photos never flip). ScanWorker builds it once per run
+  from the newest 5,000 examples. Settings "Learns from you" shows the example count and re-sorts
+  unsure pictures (`requeueUnsure`). New rules: `LongScreenshotRule` (scrolling captures),
+  `FlatGraphicRule`, `DocumentKeywordRule` (IDs, tickets, notes, medical, school), `ListLayoutRule`,
+  `DocumentLabelRule`, `MemePhraseRule`, `SocialWatermarkRule`, `GrayscaleDocumentRule` (new
+  Hasler-Süsstrunk `colorfulness` in `VisualFeatures`); more festival/devotional greetings. Single
+  universal APK (`splits.abi` disabled) via `assembleRelease`. Synthetic eval: 0.917 → 0.983.
+
+### Evaluation (60 synthetic fixtures, classifier v3)
+
+```
+actual \ predicted    PHOTO SCREENSHOT MEME FORWARD DOCUMENT OTHER
+PHOTO                   11      0        0     0       0       1
+SCREENSHOT               0     12        0     0       0       0
+MEME                     0      0       12     0       0       0
+FORWARD                  0      0        0    12       0       0
+DOCUMENT                 0      0        0     0      12       0
+accuracy 0.983 · precision 1.00 for every category (v2 was 0.917; the one miss falls to OTHER)
+First pass only (no ML): accuracy 0.317
+```
 
 ### Evaluation (60 synthetic fixtures, classifier v2)
 
@@ -153,5 +176,7 @@ First pass only (no ML): accuracy 0.317
 - Swipe-mode undo of "move category" restores the previous category as an override rather than
   clearing the override.
 - The Baseline Profile must be generated on a device (`./gradlew :app:generateReleaseBaselineProfile`).
-- Next: run on device, real fixtures in the eval CSV, then optional extensions (custom TFLite model,
+- Personal learning only reaches already-indexed unsure pictures when the user taps "Learns from you"
+  in Settings (new pictures get it automatically on scan).
+- Next: run on device, real fixtures in the eval CSV (add the new optional `colorfulness` column), then optional extensions (custom TFLite model,
   FTS search over OCR text, cleanup reminders, Glance widget, Devanagari OCR).

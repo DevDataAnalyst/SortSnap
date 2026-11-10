@@ -3,7 +3,16 @@ package com.sortsnap.classifier
 import kotlinx.serialization.Serializable
 
 @Serializable
-enum class SignalSource { RULE, ML, PRIOR }
+enum class SignalSource {
+    RULE,
+    ML,
+
+    /** Per-folder learned rule. */
+    PRIOR,
+
+    /** Similarity to images the user sorted by hand (see [PersonalModel]). */
+    PERSONAL,
+}
 
 /**
  * One piece of evidence that fired for an image. [scores] are signed per-category contributions

@@ -3,7 +3,7 @@ package com.sortsnap.classifier
 /**
  * Combines signals into normalised per-category scores.
  *
- * total(c) = ruleWeight * Σ rule(c) + mlWeight * Σ ml(c) + Σ prior(c), clamped at 0.
+ * total(c) = ruleWeight * Σ rule(c) + mlWeight * Σ ml(c) + Σ prior(c) + Σ personal(c), clamped at 0.
  * score(c) = total(c) / (Σ total + smoothing)   (each category's share, for display/debugging)
  * confidence = top / (top + runnerUp + smoothing)
  *
@@ -19,7 +19,7 @@ object ScoreFusion {
             val w = when (s.source) {
                 SignalSource.RULE -> config.ruleWeight
                 SignalSource.ML -> config.mlWeight
-                SignalSource.PRIOR -> 1f
+                SignalSource.PRIOR, SignalSource.PERSONAL -> 1f
             }
             for ((cat, v) in s.scores) {
                 if (cat == Category.OTHER) continue

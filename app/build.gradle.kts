@@ -27,8 +27,8 @@ android {
         applicationId = "com.sortsnap"
         minSdk = 26
         targetSdk = 37
-        versionCode = 1
-        versionName = "1.0.0"
+        versionCode = 2
+        versionName = "1.1.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
@@ -71,6 +71,13 @@ android {
         unitTests {
             isIncludeAndroidResources = true
             isReturnDefaultValues = true
+        }
+    }
+
+    // One universal APK: every ABI's native ML Kit libraries in a single file (no per-ABI splits).
+    splits {
+        abi {
+            isEnable = false
         }
     }
 

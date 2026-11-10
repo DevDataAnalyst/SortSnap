@@ -29,6 +29,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
@@ -50,6 +51,7 @@ fun SettingsScreen(
 ) {
     val s by viewModel.state.collectAsStateWithLifecycle()
     val rules by viewModel.learnedRules.collectAsStateWithLifecycle()
+    val personalExamples by viewModel.personalExamples.collectAsStateWithLifecycle()
     val snackbar = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
@@ -81,6 +83,29 @@ fun SettingsScreen(
                 headlineContent = { Text(stringResource(R.string.settings_scan_now)) },
                 supportingContent = { Text(stringResource(R.string.settings_scan_now_sub)) },
                 modifier = Modifier.selectable(false, onClick = { viewModel.scanNowAnyway(); toast(R.string.rescan_started) }, role = Role.Button),
+            )
+            HorizontalDivider()
+            SectionTitle(stringResource(R.string.settings_personal_learning))
+            ListItem(
+                headlineContent = {
+                    Text(
+                        if (personalExamples == 0) {
+                            stringResource(R.string.settings_personal_learning_empty)
+                        } else {
+                            pluralStringResource(R.plurals.settings_personal_learning_count, personalExamples, personalExamples)
+                        },
+                    )
+                },
+                supportingContent = { Text(stringResource(R.string.settings_resort_unsure_sub)) },
+                modifier = Modifier.selectable(
+                    false,
+                    onClick = {
+                        viewModel.resortUnsure { n ->
+                            if (n == 0) toast(R.string.resort_nothing) else toast(R.string.resort_started)
+                        }
+                    },
+                    role = Role.Button,
+                ),
             )
             HorizontalDivider()
             SectionTitle(stringResource(R.string.settings_learned_rules))

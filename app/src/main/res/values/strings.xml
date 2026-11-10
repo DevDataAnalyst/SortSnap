@@ -126,6 +126,15 @@
     <string name="settings_rescan_sub">Re-sort everything you have not corrected yourself</string>
     <string name="settings_scan_now">Scan now anyway</string>
     <string name="settings_scan_now_sub">Ignore the battery rule for the first full scan</string>
+    <string name="settings_personal_learning">Learns from you</string>
+    <string name="settings_personal_learning_empty">Move or confirm pictures and SortSnap learns how you sort</string>
+    <plurals name="settings_personal_learning_count">
+        <item quantity="one">Learning from %1$d picture you sorted</item>
+        <item quantity="other">Learning from %1$d pictures you sorted</item>
+    </plurals>
+    <string name="settings_resort_unsure_sub">Tap to re-sort unsure pictures using what it has learned</string>
+    <string name="resort_started">Re-sorting unsure pictures…</string>
+    <string name="resort_nothing">No unsure pictures to re-sort</string>
     <string name="settings_learned_rules">Learned rules</string>
     <string name="settings_learned_rules_empty">None yet. Correct 5 pictures from the same folder to teach SortSnap a rule.</string>
     <string name="settings_learned_rule">\"%1$s\" → %2$s</string>
