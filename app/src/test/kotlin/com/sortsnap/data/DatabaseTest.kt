@@ -14,6 +14,7 @@ import com.sortsnap.data.db.ImageRecord
 import com.sortsnap.data.db.SortSnapDatabase
 import com.sortsnap.data.media.MediaStoreRepository
 import com.sortsnap.data.scan.IndexSync
+import com.sortsnap.data.scan.ScanScheduler
 import com.sortsnap.domain.CorrectionUseCase
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
@@ -109,11 +110,13 @@ class DatabaseTest {
                 record(2, category = Category.PHOTO).copy(classifierVersion = 3, confidence = 0.95f),
                 record(3, category = Category.MEME).copy(classifierVersion = 3, confidence = 0.5f),
                 record(4, category = Category.OTHER).copy(classifierVersion = 3, confidence = 0.4f),
+                record(5, category = Category.FORWARD).copy(classifierVersion = 3, confidence = 0.65f),
             ),
         )
         db.images().setOverride(listOf(4L), Category.DOCUMENT)
-        assertThat(db.images().requeueUnsure(0.55f)).isEqualTo(2)
-        assertThat(db.images().pendingBatch(3, 0, 50).map { it.mediaId }).containsExactly(1L, 3L)
+        // Same threshold the scheduler uses: everything personal learning may still change.
+        assertThat(db.images().requeueUnsure(ScanScheduler.UNSURE_BELOW)).isEqualTo(3)
+        assertThat(db.images().pendingBatch(3, 0, 50).map { it.mediaId }).containsExactly(1L, 3L, 5L)
     }
 
     @Test fun movingToSameCategoryLogsNoCorrection() = runTest {
