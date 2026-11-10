@@ -58,6 +58,29 @@ fun ReviewScreen(
 ) {
     val sections by viewModel.sections.collectAsStateWithLifecycle()
     val cards by viewModel.cards.collectAsStateWithLifecycle()
+    ReviewContent(
+        sections = sections,
+        cards = cards,
+        onOpenSection = onOpenSection,
+        onOpenSwipe = onOpenSwipe,
+        onConfirm = viewModel::confirm,
+        onCorrect = viewModel::correct,
+        onSkip = viewModel::skip,
+    )
+}
+
+/** Stateless body of [ReviewScreen]. */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun ReviewContent(
+    sections: List<SectionSummary>?,
+    cards: List<ImageRecord>?,
+    onOpenSection: (CleanupSection) -> Unit,
+    onOpenSwipe: () -> Unit,
+    onConfirm: (Long) -> Unit,
+    onCorrect: (Long, com.sortsnap.classifier.Category) -> Unit,
+    onSkip: (Long) -> Unit,
+) {
     Scaffold(topBar = { TopAppBar(title = { Text(stringResource(R.string.review_title)) }) }) { padding ->
         LazyColumn(
             modifier = Modifier.padding(padding).fillMaxSize().testTag("review_list"),
@@ -67,9 +90,9 @@ fun ReviewScreen(
             item(key = "confirm") {
                 QuickConfirmCard(
                     cards = cards,
-                    onYes = viewModel::confirm,
-                    onCorrect = viewModel::correct,
-                    onSkip = viewModel::skip,
+                    onYes = onConfirm,
+                    onCorrect = onCorrect,
+                    onSkip = onSkip,
                 )
             }
             item(key = "cleanup_title") {

@@ -71,6 +71,12 @@ android {
         unitTests {
             isIncludeAndroidResources = true
             isReturnDefaultValues = true
+            // GuideScreenshots writes the README images here: -PguideDir=docs/screenshots
+            all { test ->
+                providers.gradleProperty("guideDir").orNull?.let {
+                    test.systemProperty("sortsnap.guideDir", rootProject.file(it).absolutePath)
+                }
+            }
         }
     }
 

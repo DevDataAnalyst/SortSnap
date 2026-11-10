@@ -1,5 +1,6 @@
 package com.sortsnap.ui.settings
 
+import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -38,11 +39,28 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.sortsnap.BuildConfig
 import com.sortsnap.R
 import com.sortsnap.classifier.Category
+import com.sortsnap.data.db.FolderPriorEntity
+import com.sortsnap.data.settings.AppSettings
 import com.sortsnap.data.settings.ThemeMode
 import com.sortsnap.ui.components.pluralLabel
 import kotlinx.coroutines.launch
 
-@OptIn(ExperimentalMaterial3Api::class)
+/** Everything the Settings screen can ask for; the screen itself holds no state. */
+class SettingsActions(
+    val setHideClutter: (Boolean) -> Unit = {},
+    val setUnsure: (Category) -> Unit = {},
+    val rescan: () -> Unit = {},
+    val scanNowAnyway: () -> Unit = {},
+    /** Re-sorts unsure pictures; calls back with how many were queued. */
+    val resortUnsure: ((Int) -> Unit) -> Unit = {},
+    val deleteRule: (String) -> Unit = {},
+    val clearRules: () -> Unit = {},
+    val setTheme: (ThemeMode) -> Unit = {},
+    val setDynamic: (Boolean) -> Unit = {},
+    val openAbout: () -> Unit = {},
+    val openDebug: () -> Unit = {},
+)
+
 @Composable
 fun SettingsScreen(
     onOpenAbout: () -> Unit,
@@ -52,6 +70,35 @@ fun SettingsScreen(
     val s by viewModel.state.collectAsStateWithLifecycle()
     val rules by viewModel.learnedRules.collectAsStateWithLifecycle()
     val personalExamples by viewModel.personalExamples.collectAsStateWithLifecycle()
+    val actions = remember(viewModel, onOpenAbout, onOpenDebug) {
+        SettingsActions(
+            setHideClutter = { viewModel.setHideClutter(it) },
+            setUnsure = { viewModel.setUnsure(it) },
+            rescan = { viewModel.rescan() },
+            scanNowAnyway = { viewModel.scanNowAnyway() },
+            resortUnsure = { viewModel.resortUnsure(it) },
+            deleteRule = { viewModel.deleteRule(it) },
+            clearRules = { viewModel.clearRules() },
+            setTheme = { viewModel.setTheme(it) },
+            setDynamic = { viewModel.setDynamic(it) },
+            openAbout = onOpenAbout,
+            openDebug = onOpenDebug,
+        )
+    }
+    SettingsContent(s, rules, personalExamples, actions, showDebug = BuildConfig.DEBUG)
+}
+
+/** Stateless body of [SettingsScreen]. */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun SettingsContent(
+    s: AppSettings,
+    rules: List<FolderPriorEntity>,
+    personalExamples: Int,
+    actions: SettingsActions,
+    showDebug: Boolean,
+    scrollState: ScrollState = rememberScrollState(),
+) {
     val snackbar = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
@@ -61,28 +108,28 @@ fun SettingsScreen(
         topBar = { TopAppBar(title = { Text(stringResource(R.string.settings_title)) }) },
         snackbarHost = { SnackbarHost(snackbar) },
     ) { padding ->
-        Column(Modifier.padding(padding).fillMaxSize().verticalScroll(rememberScrollState()).testTag("settings")) {
+        Column(Modifier.padding(padding).fillMaxSize().verticalScroll(scrollState).testTag("settings")) {
             ListItem(
                 headlineContent = { Text(stringResource(R.string.settings_hide_clutter)) },
                 supportingContent = { Text(stringResource(R.string.settings_hide_clutter_sub)) },
                 trailingContent = {
-                    Switch(checked = s.hideClutter, onCheckedChange = viewModel::setHideClutter, modifier = Modifier.testTag("switch_hide_clutter"))
+                    Switch(checked = s.hideClutter, onCheckedChange = actions.setHideClutter, modifier = Modifier.testTag("switch_hide_clutter"))
                 },
             )
             SectionTitle(stringResource(R.string.settings_unsure))
             listOf(Category.OTHER, Category.PHOTO).forEach { c ->
-                RadioRow(stringResource(c.pluralLabel()), selected = s.unsureCategory == c) { viewModel.setUnsure(c) }
+                RadioRow(stringResource(c.pluralLabel()), selected = s.unsureCategory == c) { actions.setUnsure(c) }
             }
             HorizontalDivider()
             ListItem(
                 headlineContent = { Text(stringResource(R.string.settings_rescan)) },
                 supportingContent = { Text(stringResource(R.string.settings_rescan_sub)) },
-                modifier = Modifier.selectable(false, onClick = { viewModel.rescan(); toast(R.string.rescan_started) }, role = Role.Button),
+                modifier = Modifier.selectable(false, onClick = { actions.rescan(); toast(R.string.rescan_started) }, role = Role.Button),
             )
             ListItem(
                 headlineContent = { Text(stringResource(R.string.settings_scan_now)) },
                 supportingContent = { Text(stringResource(R.string.settings_scan_now_sub)) },
-                modifier = Modifier.selectable(false, onClick = { viewModel.scanNowAnyway(); toast(R.string.rescan_started) }, role = Role.Button),
+                modifier = Modifier.selectable(false, onClick = { actions.scanNowAnyway(); toast(R.string.rescan_started) }, role = Role.Button),
             )
             HorizontalDivider()
             SectionTitle(stringResource(R.string.settings_personal_learning))
@@ -100,7 +147,7 @@ fun SettingsScreen(
                 modifier = Modifier.selectable(
                     false,
                     onClick = {
-                        viewModel.resortUnsure { n ->
+                        actions.resortUnsure { n ->
                             if (n == 0) toast(R.string.resort_nothing) else toast(R.string.resort_started)
                         }
                     },
@@ -121,14 +168,14 @@ fun SettingsScreen(
                         headlineContent = { Text(stringResource(R.string.settings_learned_rule, rule.bucket, stringResource(rule.category.pluralLabel()))) },
                         supportingContent = { Text(stringResource(R.string.settings_learned_rule_sub, rule.sampleCount)) },
                         trailingContent = {
-                            IconButton(onClick = { viewModel.deleteRule(rule.bucket) }) {
+                            IconButton(onClick = { actions.deleteRule(rule.bucket) }) {
                                 Icon(Icons.Filled.Delete, stringResource(R.string.settings_delete_rule))
                             }
                         },
                         modifier = Modifier.testTag("rule_${rule.bucket}"),
                     )
                 }
-                TextButton(onClick = { viewModel.clearRules(); toast(R.string.rules_cleared) }, modifier = Modifier.padding(horizontal = 8.dp)) {
+                TextButton(onClick = { actions.clearRules(); toast(R.string.rules_cleared) }, modifier = Modifier.padding(horizontal = 8.dp)) {
                     Text(stringResource(R.string.settings_clear_rules))
                 }
             }
@@ -140,21 +187,21 @@ fun SettingsScreen(
                     ThemeMode.LIGHT -> R.string.theme_light
                     ThemeMode.DARK -> R.string.theme_dark
                 }
-                RadioRow(stringResource(label), selected = s.themeMode == t) { viewModel.setTheme(t) }
+                RadioRow(stringResource(label), selected = s.themeMode == t) { actions.setTheme(t) }
             }
             ListItem(
                 headlineContent = { Text(stringResource(R.string.settings_dynamic_color)) },
-                trailingContent = { Switch(checked = s.dynamicColor, onCheckedChange = viewModel::setDynamic) },
+                trailingContent = { Switch(checked = s.dynamicColor, onCheckedChange = actions.setDynamic) },
             )
             HorizontalDivider()
             ListItem(
                 headlineContent = { Text(stringResource(R.string.settings_about)) },
-                modifier = Modifier.selectable(false, onClick = onOpenAbout, role = Role.Button),
+                modifier = Modifier.selectable(false, onClick = actions.openAbout, role = Role.Button),
             )
-            if (BuildConfig.DEBUG) {
+            if (showDebug) {
                 ListItem(
                     headlineContent = { Text(stringResource(R.string.settings_debug)) },
-                    modifier = Modifier.selectable(false, onClick = onOpenDebug, role = Role.Button),
+                    modifier = Modifier.selectable(false, onClick = actions.openDebug, role = Role.Button),
                 )
             }
         }

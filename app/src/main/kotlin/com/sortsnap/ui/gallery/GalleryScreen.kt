@@ -35,10 +35,14 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
 import com.sortsnap.R
 import com.sortsnap.classifier.Category
 import com.sortsnap.domain.GalleryFilter
+import com.sortsnap.domain.GalleryItem
+import com.sortsnap.data.scan.ScanStatus
+import com.sortsnap.ui.components.GalleryEntry
 import com.sortsnap.ui.components.CategoryPickerDialog
 import com.sortsnap.ui.components.DeleteFlowHost
 import com.sortsnap.ui.components.EmptyState
@@ -81,6 +85,51 @@ fun GalleryScreen(
         )
     }
 
+    val title = (viewModel.pinnedFilter as? GalleryFilter.Only)?.category?.let { stringResource(it.pluralLabel()) }
+        ?: stringResource(R.string.nav_gallery)
+    GalleryContent(
+        title = title,
+        onBack = onBack,
+        scan = scan,
+        showFilters = viewModel.pinnedFilter == null,
+        filter = filter,
+        onSelectFilter = viewModel::setFilter,
+        entries = entries,
+        columns = columns,
+        selected = selected,
+        onClearSelection = viewModel::clearSelection,
+        onMoveSelected = { picking = true },
+        onTrashSelected = { deleteFlow.start(viewModel.selectedItems().map { it.toDeleteTarget() }) },
+        onOpen = { index -> filter?.let { onOpenViewer(it, index) } },
+        onToggleSelect = viewModel::toggle,
+        onColumnsChange = { viewModel.setColumns(it) },
+        banner = banner,
+        snackbar = snackbar,
+    )
+}
+
+/** Stateless body of [GalleryScreen]: top bar (or selection bar), scan progress, filter chips and the paged grid. */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun GalleryContent(
+    title: String,
+    onBack: (() -> Unit)?,
+    scan: ScanStatus,
+    showFilters: Boolean,
+    filter: GalleryFilter?,
+    onSelectFilter: (GalleryFilter) -> Unit,
+    entries: LazyPagingItems<GalleryEntry>,
+    columns: Int,
+    selected: Set<Long>,
+    onClearSelection: () -> Unit,
+    onMoveSelected: () -> Unit,
+    onTrashSelected: () -> Unit,
+    onOpen: (index: Int) -> Unit,
+    onToggleSelect: (GalleryItem) -> Unit,
+    onColumnsChange: (Int) -> Unit,
+    banner: @Composable () -> Unit = {},
+    snackbar: SnackbarHostState = remember { SnackbarHostState() },
+) {
     Scaffold(
         topBar = {
             Column {
@@ -88,25 +137,20 @@ fun GalleryScreen(
                     TopAppBar(
                         title = { Text(stringResource(R.string.selected_count, selected.size), modifier = Modifier.testTag("selection_count")) },
                         navigationIcon = {
-                            IconButton(onClick = viewModel::clearSelection) {
+                            IconButton(onClick = onClearSelection) {
                                 Icon(Icons.Filled.Close, contentDescription = stringResource(R.string.close))
                             }
                         },
                         actions = {
-                            IconButton(onClick = { picking = true }, modifier = Modifier.testTag("action_move")) {
+                            IconButton(onClick = onMoveSelected, modifier = Modifier.testTag("action_move")) {
                                 Icon(Icons.Filled.Edit, contentDescription = stringResource(R.string.action_move_to_category))
                             }
-                            IconButton(
-                                onClick = { deleteFlow.start(viewModel.selectedItems().map { it.toDeleteTarget() }) },
-                                modifier = Modifier.testTag("action_trash"),
-                            ) {
+                            IconButton(onClick = onTrashSelected, modifier = Modifier.testTag("action_trash")) {
                                 Icon(Icons.Filled.Delete, contentDescription = stringResource(R.string.action_trash))
                             }
                         },
                     )
                 } else {
-                    val title = (viewModel.pinnedFilter as? GalleryFilter.Only)?.category?.let { stringResource(it.pluralLabel()) }
-                        ?: stringResource(R.string.nav_gallery)
                     TopAppBar(
                         title = { Text(title) },
                         navigationIcon = {
@@ -119,9 +163,9 @@ fun GalleryScreen(
                     )
                 }
                 ScanProgressBar(scan)
-                if (viewModel.pinnedFilter == null) {
+                if (showFilters) {
                     banner()
-                    FilterChips(current = filter, onSelect = viewModel::setFilter)
+                    FilterChips(current = filter, onSelect = onSelectFilter)
                 }
             }
         },
@@ -131,9 +175,9 @@ fun GalleryScreen(
             entries = entries,
             columns = columns,
             selected = selected,
-            onOpen = { index, _ -> filter?.let { onOpenViewer(it, index) } },
-            onToggleSelect = viewModel::toggle,
-            onColumnsChange = { viewModel.setColumns(it) },
+            onOpen = { index, _ -> onOpen(index) },
+            onToggleSelect = onToggleSelect,
+            onColumnsChange = onColumnsChange,
             modifier = Modifier.padding(padding).fillMaxSize(),
             emptyContent = {
                 EmptyState(
