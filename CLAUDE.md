@@ -130,6 +130,13 @@ Rules:
   stateless `*Content` composables (`GalleryContent`, `CategoriesContent`, `ReviewContent`,
   `SettingsContent` + `SettingsActions`, `ViewerTopBar`, `SortSnapBottomBar`). Not device captures.
 
+- **Select all + delete permanently (app 1.2.0)** — Gallery and album "More options" menu: "Select all"
+  selects every image the current filter shows (not only loaded pages) via `GalleryRepository.allTargets`
+  (MediaStore stamps for All, slim `TargetRow` Room queries for categories; selection is now
+  `Map<Long, DeleteTarget>`). "Delete permanently" (selection mode only): `MediaDeleter.start(…, permanent = true)`
+  always shows an in-app "cannot be recovered" dialog first, then Android 11+ uses `createDeleteRequest`
+  (skips the trash), Android 10 the `RecoverableSecurityException` loop, Android 9 and below a direct delete.
+
 ### Evaluation (60 synthetic fixtures, classifier v3)
 
 ```
@@ -178,6 +185,8 @@ First pass only (no ML): accuracy 0.317
   `app-debug.apk`, seed a test phone, and paste any crash logcat back.
 - Android 14 partial access: images the user deselects are dropped from the index on the next sync,
   including their manual overrides (the correction log keeps the history).
+- Release APKs are signed with the build machine's debug key unless `keystore.properties` exists, so each
+  cloud build has a different certificate and cannot install over the previous one (uninstall first).
 - Swipe-mode undo of "move category" restores the previous category as an override rather than
   clearing the override.
 - The Baseline Profile must be generated on a device (`./gradlew :app:generateReleaseBaselineProfile`).

@@ -50,6 +50,9 @@
     <string name="action_move_to_category">Move to category</string>
     <string name="action_trash">Move to trash</string>
     <string name="action_select_all">Select all</string>
+    <string name="action_delete_permanently">Delete permanently</string>
+    <string name="more_options">More options</string>
+    <string name="selecting_all">Selecting all…</string>
     <string name="action_info">Details</string>
     <string name="scanning_progress">Sorting %1$d of %2$d</string>
     <string name="scanning_sync">Checking library…</string>
@@ -116,6 +119,9 @@
     <string name="confirm_delete_title">Delete %1$d items?</string>
     <string name="confirm_delete_body">This frees %1$s. On this Android version deleted items cannot be recovered.</string>
     <string name="confirm_delete_action">Delete</string>
+    <string name="confirm_delete_forever_title">Permanently delete %1$d items?</string>
+    <string name="confirm_delete_forever_body">This frees %1$s. The items skip the trash and cannot be recovered.</string>
+    <string name="confirm_delete_forever_action">Delete permanently</string>
 
     <!-- Settings -->
     <string name="settings_title">Settings</string>

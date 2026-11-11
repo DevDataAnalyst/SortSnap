@@ -2,6 +2,8 @@ package com.sortsnap.ui.gallery
 
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -12,6 +14,11 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
@@ -64,6 +71,7 @@ fun GalleryScreen(
     val filter by viewModel.filter.collectAsStateWithLifecycle()
     val columns by viewModel.columns.collectAsStateWithLifecycle()
     val selected by viewModel.selected.collectAsStateWithLifecycle()
+    val selectingAll by viewModel.selectingAll.collectAsStateWithLifecycle()
     val scan by viewModel.scanStatus.collectAsStateWithLifecycle()
     val entries = viewModel.entries.collectAsLazyPagingItems()
     val snackbar = remember { SnackbarHostState() }
@@ -99,7 +107,10 @@ fun GalleryScreen(
         selected = selected,
         onClearSelection = viewModel::clearSelection,
         onMoveSelected = { picking = true },
-        onTrashSelected = { deleteFlow.start(viewModel.selectedItems().map { it.toDeleteTarget() }) },
+        onTrashSelected = { deleteFlow.start(viewModel.selectedTargets()) },
+        onDeleteForeverSelected = { deleteFlow.start(viewModel.selectedTargets(), permanent = true) },
+        onSelectAll = viewModel::selectAll,
+        selectingAll = selectingAll,
         onOpen = { index -> filter?.let { onOpenViewer(it, index) } },
         onToggleSelect = viewModel::toggle,
         onColumnsChange = { viewModel.setColumns(it) },
@@ -129,6 +140,9 @@ fun GalleryContent(
     onColumnsChange: (Int) -> Unit,
     banner: @Composable () -> Unit = {},
     snackbar: SnackbarHostState = remember { SnackbarHostState() },
+    onDeleteForeverSelected: () -> Unit = {},
+    onSelectAll: () -> Unit = {},
+    selectingAll: Boolean = false,
 ) {
     Scaffold(
         topBar = {
@@ -148,6 +162,10 @@ fun GalleryContent(
                             IconButton(onClick = onTrashSelected, modifier = Modifier.testTag("action_trash")) {
                                 Icon(Icons.Filled.Delete, contentDescription = stringResource(R.string.action_trash))
                             }
+                            OverflowMenu(
+                                onSelectAll = onSelectAll,
+                                onDeleteForever = onDeleteForeverSelected,
+                            )
                         },
                     )
                 } else {
@@ -160,9 +178,13 @@ fun GalleryContent(
                                 }
                             }
                         },
+                        actions = { OverflowMenu(onSelectAll = onSelectAll, onDeleteForever = null) },
                     )
                 }
                 ScanProgressBar(scan)
+                if (selectingAll) {
+                    LinearProgressIndicator(Modifier.fillMaxWidth().testTag("selecting_all"))
+                }
                 if (showFilters) {
                     banner()
                     FilterChips(current = filter, onSelect = onSelectFilter)
@@ -187,6 +209,35 @@ fun GalleryContent(
                 )
             },
         )
+    }
+}
+
+/**
+ * "More options" menu. "Select all" is offered in both bars (it also starts selection mode);
+ * "Delete permanently" only while something is selected ([onDeleteForever] non-null).
+ */
+@Composable
+private fun OverflowMenu(onSelectAll: () -> Unit, onDeleteForever: (() -> Unit)?) {
+    var open by remember { mutableStateOf(false) }
+    Box {
+        IconButton(onClick = { open = true }, modifier = Modifier.testTag("action_more")) {
+            Icon(Icons.Filled.MoreVert, contentDescription = stringResource(R.string.more_options))
+        }
+        DropdownMenu(expanded = open, onDismissRequest = { open = false }) {
+            DropdownMenuItem(
+                text = { Text(stringResource(R.string.action_select_all)) },
+                onClick = { open = false; onSelectAll() },
+                modifier = Modifier.testTag("action_select_all"),
+            )
+            if (onDeleteForever != null) {
+                DropdownMenuItem(
+                    text = { Text(stringResource(R.string.action_delete_permanently), color = MaterialTheme.colorScheme.error) },
+                    leadingIcon = { Icon(Icons.Filled.Delete, contentDescription = null, tint = MaterialTheme.colorScheme.error) },
+                    onClick = { open = false; onDeleteForever() },
+                    modifier = Modifier.testTag("action_delete_forever"),
+                )
+            }
+        }
     }
 }
 

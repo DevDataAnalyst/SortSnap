@@ -6,6 +6,7 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.IntentSenderRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -26,15 +27,15 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
 /**
- * State machine for "move to trash". Every path ends in a confirmation the user must accept:
+ * State machine for "move to trash" and "delete permanently". Every path ends in a confirmation the user must accept:
  * the system dialog (Android 10+) or our own dialog (Android 9 and below).
  */
 class DeleteFlowState(private val deleter: MediaDeleter, private val scope: CoroutineScope) {
     var step: DeleteStep? by mutableStateOf(null)
         private set
 
-    fun start(targets: List<DeleteTarget>) {
-        scope.launch { step = deleter.start(targets) }
+    fun start(targets: List<DeleteTarget>, permanent: Boolean = false) {
+        scope.launch { step = deleter.start(targets, permanent) }
     }
 
     fun onSystemResult(approved: Boolean) {
@@ -73,11 +74,18 @@ fun DeleteFlowHost(state: DeleteFlowState, onFinished: (DeleteStep) -> Unit) {
         is DeleteStep.ConfirmInApp -> AlertDialog(
             modifier = androidx.compose.ui.Modifier.testTag("confirm_delete_dialog"),
             onDismissRequest = state::cancelInApp,
-            title = { Text(stringResource(R.string.confirm_delete_title, step.count)) },
-            text = { Text(stringResource(R.string.confirm_delete_body, Formatting.bytes(step.bytes))) },
+            title = {
+                Text(stringResource(if (step.permanent) R.string.confirm_delete_forever_title else R.string.confirm_delete_title, step.count))
+            },
+            text = {
+                Text(stringResource(if (step.permanent) R.string.confirm_delete_forever_body else R.string.confirm_delete_body, Formatting.bytes(step.bytes)))
+            },
             confirmButton = {
                 TextButton(onClick = state::confirmInApp, modifier = androidx.compose.ui.Modifier.testTag("confirm_delete")) {
-                    Text(stringResource(R.string.confirm_delete_action))
+                    Text(
+                        stringResource(if (step.permanent) R.string.confirm_delete_forever_action else R.string.confirm_delete_action),
+                        color = if (step.permanent) MaterialTheme.colorScheme.error else androidx.compose.ui.graphics.Color.Unspecified,
+                    )
                 }
             },
             dismissButton = { TextButton(onClick = state::cancelInApp) { Text(stringResource(R.string.cancel)) } },

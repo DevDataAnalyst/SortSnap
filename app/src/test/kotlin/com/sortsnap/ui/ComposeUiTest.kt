@@ -29,6 +29,8 @@ import com.sortsnap.ui.components.GalleryEntry
 import com.sortsnap.ui.components.PagedGalleryGrid
 import com.sortsnap.ui.components.rememberDeleteFlowState
 import com.sortsnap.ui.gallery.FilterChips
+import com.sortsnap.ui.gallery.GalleryContent
+import com.sortsnap.data.scan.ScanStatus
 import com.sortsnap.ui.gallery.GalleryViewModel
 import com.sortsnap.ui.onboarding.OnboardingScreen
 import com.sortsnap.ui.theme.SortSnapTheme
@@ -51,9 +53,11 @@ private fun item(id: Long, daysAgo: Int = 0) = GalleryItem(
 private class FakeDeleter : MediaDeleter {
     var started: List<DeleteTarget> = emptyList()
     var confirmed = false
-    override suspend fun start(targets: List<DeleteTarget>): DeleteStep {
+    var permanent = false
+    override suspend fun start(targets: List<DeleteTarget>, permanent: Boolean): DeleteStep {
         started = targets
-        return DeleteStep.ConfirmInApp(targets.size, targets.sumOf { it.size })
+        this.permanent = permanent
+        return DeleteStep.ConfirmInApp(targets.size, targets.sumOf { it.size }, permanent)
     }
     override suspend fun onSystemResult(approved: Boolean): DeleteStep = DeleteStep.Cancelled
     override suspend fun confirmInApp(): DeleteStep {
@@ -174,6 +178,60 @@ class ComposeUiTest {
         compose.waitForIdle()
         assertThat(deleter.confirmed).isFalse()
         assertThat(finished).isEqualTo(DeleteStep.Cancelled)
+    }
+
+    @Test fun deleteFlow_permanentWarnsItCannotBeUndone() {
+        val deleter = FakeDeleter()
+        var finished: DeleteStep? = null
+        compose.setContent {
+            SortSnapTheme {
+                val state = rememberDeleteFlowState(deleter)
+                DeleteFlowHost(state) { finished = it }
+                androidx.compose.material3.Button(onClick = {
+                    state.start(listOf(DeleteTarget(7, "content://x/7", 2048), DeleteTarget(8, "content://x/8", 1024)), permanent = true)
+                }) { androidx.compose.material3.Text("forever") }
+            }
+        }
+        compose.onNodeWithText("forever").performClick()
+        compose.onNodeWithText("Permanently delete 2 items?").assertIsDisplayed()
+        compose.onNodeWithText("cannot be recovered", substring = true).assertIsDisplayed()
+        assertThat(deleter.permanent).isTrue()
+        assertThat(deleter.confirmed).isFalse()
+        compose.onNodeWithTag("confirm_delete").performClick()
+        compose.waitForIdle()
+        assertThat((finished as DeleteStep.Done).removedIds).containsExactly(7L, 8L)
+    }
+
+    @Composable
+    private fun Gallery(selected: Set<Long>, onSelectAll: () -> Unit, onDeleteForever: () -> Unit) {
+        val paging = remember { flowOf(GalleryViewModel.withHeaders(PagingData.from(listOf(item(1), item(2))), System.currentTimeMillis())) }
+        GalleryContent(
+            title = "Gallery", onBack = null, scan = ScanStatus.IDLE, showFilters = false, filter = GalleryFilter.All,
+            onSelectFilter = {}, entries = paging.collectAsLazyPagingItems(), columns = 3, selected = selected,
+            onClearSelection = {}, onMoveSelected = {}, onTrashSelected = {}, onOpen = {}, onToggleSelect = {},
+            onColumnsChange = {}, onDeleteForeverSelected = onDeleteForever, onSelectAll = onSelectAll,
+        )
+    }
+
+    @Test fun gallery_selectAllAndDeletePermanentlyInSelectionMenu() {
+        var selectAll = 0
+        var forever = 0
+        compose.setContent { SortSnapTheme { Gallery(setOf(1L), { selectAll++ }, { forever++ }) } }
+        compose.onNodeWithTag("action_more").performClick()
+        compose.onNodeWithTag("action_select_all").performClick()
+        assertThat(selectAll).isEqualTo(1)
+        compose.onNodeWithTag("action_more").performClick()
+        compose.onNodeWithTag("action_delete_forever").performClick()
+        assertThat(forever).isEqualTo(1)
+    }
+
+    @Test fun gallery_selectAllAvailableBeforeSelecting_deleteForeverIsNot() {
+        var selectAll = 0
+        compose.setContent { SortSnapTheme { Gallery(emptySet(), { selectAll++ }, {}) } }
+        compose.onNodeWithTag("action_more").performClick()
+        compose.onNodeWithTag("action_delete_forever").assertDoesNotExist()
+        compose.onNodeWithTag("action_select_all").performClick()
+        assertThat(selectAll).isEqualTo(1)
     }
 
     @Test fun detailsSheet_showsWhyList() {

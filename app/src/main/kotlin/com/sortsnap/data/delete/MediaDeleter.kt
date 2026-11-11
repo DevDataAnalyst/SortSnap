@@ -20,8 +20,11 @@ sealed interface DeleteStep {
     /** Launch the system trash/delete confirmation dialog. */
     data class LaunchSystem(val intentSender: IntentSender, val count: Int, val trash: Boolean) : DeleteStep
 
-    /** Android 9 and below has no system dialog: the app must show its own confirmation. */
-    data class ConfirmInApp(val count: Int, val bytes: Long) : DeleteStep
+    /**
+     * The app's own confirmation dialog. Mandatory on Android 9 and below (no system dialog exists)
+     * and shown first on every version for a permanent delete, which cannot be undone from the trash.
+     */
+    data class ConfirmInApp(val count: Int, val bytes: Long, val permanent: Boolean = false) : DeleteStep
 
     data class Done(val removedIds: List<Long>, val freedBytes: Long, val trashed: Boolean) : DeleteStep
 
@@ -32,7 +35,12 @@ sealed interface DeleteStep {
 
 /** Drives one deletion at a time. Implemented by [MediaStoreDeleter]; faked in UI tests. */
 interface MediaDeleter {
-    suspend fun start(targets: List<DeleteTarget>): DeleteStep
+    /**
+     * @param permanent skip the 30-day trash (Android 11+ `createDeleteRequest` instead of
+     *   `createTrashRequest`). Always begins with [DeleteStep.ConfirmInApp] so the user sees an explicit
+     *   "cannot be undone" warning before the system dialog.
+     */
+    suspend fun start(targets: List<DeleteTarget>, permanent: Boolean = false): DeleteStep
     suspend fun onSystemResult(approved: Boolean): DeleteStep
     suspend fun confirmInApp(): DeleteStep
 }
@@ -44,6 +52,8 @@ interface MediaDeleter {
  * - Android 10: delete one by one; a RecoverableSecurityException yields the system consent dialog
  *   for that item, then we retry it and continue.
  * - Android 9 and below: WRITE_EXTERNAL_STORAGE delete after an in-app confirmation dialog.
+ * - Permanent delete (any version): an in-app "cannot be undone" dialog first, then the same paths
+ *   as above except that Android 11+ uses createDeleteRequest (no trash) for every chunk.
  * After success the rows are removed from Room immediately (the observer-triggered sync would also
  * catch it).
  */
@@ -57,13 +67,19 @@ class MediaStoreDeleter @Inject constructor(
     private var chunks: ArrayDeque<List<DeleteTarget>> = ArrayDeque()
     private var current: List<DeleteTarget> = emptyList()
     private var trash = false
+    private var permanent = false
     private var removed = mutableListOf<DeleteTarget>()
     private var q: ArrayDeque<DeleteTarget> = ArrayDeque()
 
-    override suspend fun start(targets: List<DeleteTarget>): DeleteStep {
+    override suspend fun start(targets: List<DeleteTarget>, permanent: Boolean): DeleteStep {
         reset()
         val unique = targets.distinctBy { it.mediaId }
         if (unique.isEmpty()) return DeleteStep.Cancelled
+        if (permanent) {
+            this.permanent = true
+            current = unique
+            return DeleteStep.ConfirmInApp(unique.size, unique.sumOf { it.size }, permanent = true)
+        }
         return when {
             Build.VERSION.SDK_INT >= Build.VERSION_CODES.R -> {
                 chunks = ArrayDeque(unique.chunked(CHUNK))
@@ -93,7 +109,19 @@ class MediaStoreDeleter @Inject constructor(
         return DeleteStep.Cancelled
     }
 
-    override suspend fun confirmInApp(): DeleteStep = withContext(Dispatchers.IO) {
+    override suspend fun confirmInApp(): DeleteStep {
+        if (permanent && Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            chunks = ArrayDeque(current.chunked(CHUNK))
+            return nextSystemChunk()
+        }
+        if (permanent && Build.VERSION.SDK_INT == Build.VERSION_CODES.Q) {
+            q = ArrayDeque(current)
+            return continueQ()
+        }
+        return deleteDirectly()
+    }
+
+    private suspend fun deleteDirectly(): DeleteStep = withContext(Dispatchers.IO) {
         current.forEach { t ->
             val ok = runCatching { resolver.delete(t.uri.toUri(), null, null) > 0 }.getOrDefault(false)
             if (ok) removed += t
@@ -106,6 +134,12 @@ class MediaStoreDeleter @Inject constructor(
         current = chunk
         val uris = chunk.map { it.uri.toUri() }
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R) return DeleteStep.Failed("unsupported")
+        if (permanent) {
+            trash = false
+            return runCatching {
+                DeleteStep.LaunchSystem(MediaStore.createDeleteRequest(resolver, uris).intentSender, chunk.size, trash = false)
+            }.getOrElse { DeleteStep.Failed(it.message ?: "Could not create delete request") }
+        }
         return runCatching {
             trash = true
             DeleteStep.LaunchSystem(MediaStore.createTrashRequest(resolver, uris, true).intentSender, chunk.size, trash = true)
@@ -142,7 +176,7 @@ class MediaStoreDeleter @Inject constructor(
     }
 
     private fun reset() {
-        chunks = ArrayDeque(); current = emptyList(); removed = mutableListOf(); q = ArrayDeque(); trash = false
+        chunks = ArrayDeque(); current = emptyList(); removed = mutableListOf(); q = ArrayDeque(); trash = false; permanent = false
     }
 
     companion object {

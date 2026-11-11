@@ -119,6 +119,17 @@ interface ImageDao {
     )
     fun pagingExcluding(excluded: List<Category>): PagingSource<Int, ImageRecord>
 
+    /** "Select all" for a category album: id, uri and size only, so 50k rows stay small. */
+    @Query("SELECT mediaId, uri, size FROM images WHERE effectiveCategory IN (:categories) ORDER BY dateTaken DESC, mediaId DESC")
+    suspend fun targetsIn(categories: List<Category>): List<TargetRow>
+
+    /** "Select all" for the Photos-only view; same rows as [pagingExcluding]. */
+    @Query(
+        """SELECT mediaId, uri, size FROM images WHERE effectiveCategory IS NULL OR effectiveCategory NOT IN (:excluded)
+           ORDER BY dateTaken DESC, mediaId DESC""",
+    )
+    suspend fun targetsExcluding(excluded: List<Category>): List<TargetRow>
+
     @Query("SELECT COUNT(*) FROM images")
     fun countFlow(): Flow<Int>
 

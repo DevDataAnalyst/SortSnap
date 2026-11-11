@@ -126,6 +126,18 @@ class DatabaseTest {
         assertThat(db.images().get(1)!!.userOverride).isEqualTo(Category.MEME)
     }
 
+    @Test fun selectAllTargetsMatchTheGridForEachFilter() = runTest {
+        db.images().insertAll(
+            listOf(record(1, category = Category.PHOTO), record(2, category = Category.MEME), record(3, category = null), record(4, category = Category.MEME)),
+        )
+        val memes = db.images().targetsIn(listOf(Category.MEME))
+        assertThat(memes.map { it.mediaId }).containsExactly(4L, 2L).inOrder()
+        assertThat(memes.first().uri).isEqualTo("content://media/external/images/media/4")
+        assertThat(memes.first().size).isEqualTo(1000L)
+        // Photos-only keeps unclassified rows, like the grid does.
+        assertThat(db.images().targetsExcluding(Category.CLUTTER.toList()).map { it.mediaId }).containsExactly(3L, 1L).inOrder()
+    }
+
     @Test fun categoryStatsAndHideClutterQuery() = runTest {
         db.images().insertAll(
             listOf(record(1, category = Category.PHOTO), record(2, category = Category.MEME), record(3, category = null), record(4, category = Category.OTHER)),

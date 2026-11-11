@@ -9,6 +9,7 @@ import androidx.paging.insertSeparators
 import androidx.paging.map
 import com.sortsnap.classifier.Category
 import com.sortsnap.data.db.ImageDao
+import com.sortsnap.data.delete.DeleteTarget
 import com.sortsnap.data.delete.MediaDeleter
 import com.sortsnap.data.scan.ScanScheduler
 import com.sortsnap.data.scan.ScanStatus
@@ -83,11 +84,15 @@ class GalleryViewModel @Inject constructor(
         .map { paging -> withHeaders(paging, System.currentTimeMillis()) }
         .cachedIn(viewModelScope)
 
-    private val _selected = MutableStateFlow<Map<Long, GalleryItem>>(emptyMap())
+    private val _selected = MutableStateFlow<Map<Long, DeleteTarget>>(emptyMap())
     val selected: StateFlow<Set<Long>> = _selected.map { it.keys }
         .stateIn(viewModelScope, SharingStarted.Eagerly, emptySet())
 
-    fun selectedItems(): List<GalleryItem> = _selected.value.values.toList()
+    /** True while "Select all" loads the ids of every image in the current view. */
+    private val _selectingAll = MutableStateFlow(false)
+    val selectingAll: StateFlow<Boolean> = _selectingAll.asStateFlow()
+
+    fun selectedTargets(): List<DeleteTarget> = _selected.value.values.toList()
 
     fun setFilter(f: GalleryFilter) {
         if (pinnedFilter == null) chosenFilter.value = f
@@ -95,7 +100,20 @@ class GalleryViewModel @Inject constructor(
 
     fun setColumns(c: Int) = viewModelScope.launch { settings.setGridColumns(c) }
 
-    fun toggle(item: GalleryItem) = _selected.update { if (item.id in it) it - item.id else it + (item.id to item) }
+    fun toggle(item: GalleryItem) = _selected.update { if (item.id in it) it - item.id else it + (item.id to item.toDeleteTarget()) }
+
+    /** Selects every image the current filter shows, not just the loaded pages (paging keeps the grid lazy). */
+    fun selectAll() {
+        val f = chosenFilter.value ?: return
+        if (_selectingAll.value) return
+        _selectingAll.value = true
+        viewModelScope.launch {
+            // A MediaStore failure leaves the current selection as it was rather than crashing.
+            runCatching { gallery.allTargets(f, indexReady.first()) }
+                .onSuccess { all -> _selected.value = all.associateBy { it.mediaId } }
+            _selectingAll.value = false
+        }
+    }
 
     fun clearSelection() { _selected.value = emptyMap() }
 

@@ -6,6 +6,7 @@ import androidx.paging.PagingData
 import androidx.paging.map
 import com.sortsnap.classifier.Category
 import com.sortsnap.data.db.ImageDao
+import com.sortsnap.data.delete.DeleteTarget
 import com.sortsnap.data.media.MediaStorePagingSource
 import com.sortsnap.data.media.MediaStoreRepository
 import kotlinx.coroutines.flow.Flow
@@ -51,6 +52,20 @@ class GalleryRepository @Inject constructor(
                     .flow.map { p -> p.map { it.toGalleryItem() } }
             else -> error("unreachable")
         }
+    }
+
+    /**
+     * Every image the grid for [filter] shows, as delete targets ("Select all"). Mirrors [pager]'s
+     * source choice. Only id/uri/size are loaded so a 50k library stays a few MB. Call off the main thread.
+     */
+    suspend fun allTargets(filter: GalleryFilter, indexReady: Boolean): List<DeleteTarget> = when {
+        filter == GalleryFilter.All || (filter == GalleryFilter.HideClutter && !indexReady) ->
+            media.stamps().map { DeleteTarget(it.id, media.uriFor(it.id).toString(), it.sizeBytes) }
+        filter == GalleryFilter.HideClutter ->
+            images.targetsExcluding(Category.CLUTTER.toList()).map { DeleteTarget(it.mediaId, it.uri, it.size) }
+        filter is GalleryFilter.Only ->
+            images.targetsIn(listOf(filter.category)).map { DeleteTarget(it.mediaId, it.uri, it.size) }
+        else -> error("unreachable")
     }
 
     companion object {
